@@ -1,0 +1,45 @@
+app:
+  port: ${APP_PORT:8203}
+  name: ${APP_NAME:tesoreria-compras-service}
+  logging: ${APP_LOGGING:info}
+  consul:
+    host: ${APP_CONSUL_HOST:consul-service}
+    port: ${APP_CONSUL_PORT:8500}
+  feign:
+    connect-timeout: ${APP_FEIGN_CONNECT_TIMEOUT:10000}
+    read-timeout: ${APP_FEIGN_READ_TIMEOUT:15000}
+
+server:
+  port: ${app.port}
+
+spring:
+  application:
+    name: ${app.name}
+  cloud:
+    consul:
+      host: ${app.consul.host}
+      port: ${app.consul.port}
+      discovery:
+        prefer-ip-address: true
+        tags: tesoreria,compras
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: ${app.feign.connect-timeout}
+            readTimeout: ${app.feign.read-timeout}
+
+logging:
+  level:
+    tesoreria.compras: ${app.logging}
+    feign: ${app.logging}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true

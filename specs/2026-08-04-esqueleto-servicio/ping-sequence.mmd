@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant Cliente
+    participant Compras as compras-service
+    participant Consul
+    participant Core as core-service
+
+    Cliente->>Compras: GET /api/tesoreria/compras/ping/{proveedorId}
+    Compras->>Consul: resolver tesoreria-core-service
+    Consul-->>Compras: instancia de core
+    Compras->>Core: GET /api/tesoreria/core/proveedor/{proveedorId}
+    Core-->>Compras: proveedor
+    Compras-->>Cliente: 200 ProveedorResponse

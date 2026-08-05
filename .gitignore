@@ -1,0 +1,44 @@
+# Java and Maven
+target/
+*.class
+*.log
+.mvn/timing.properties
+
+# Node.js
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+.parcel-cache/
+.next/
+.nuxt/
+.svelte-kit/
+dist/
+
+# Test reports and coverage
+coverage/
+jacoco.exec
+**/jacoco-report/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+docker-compose.override.yml
+
+# IDE and operating-system files
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+.DS_Store
+
+# Local agent and workspace state
+.context/
+.conductor/settings.local.toml

@@ -1,0 +1,157 @@
+# Roadmap — UM.tesoreria.compras-service
+
+Lo que este servicio construye, en orden.
+
+- El **por qué** y el alcance → [mission.md](mission.md)
+- El **cómo** → [tech-stack.md](tech-stack.md)
+
+**Sólo entra al roadmap lo que este servicio puede construir y validar solo.** Lo que
+necesita código de otro repo o datos que viven en otro servicio no es un feature nuestro:
+es integración, y está más abajo, sin bloquear nada.
+
+Cada feature abre su carpeta `specs/YYYY-MM-DD-nombre/` cuando se empieza a trabajar en
+él, no antes.
+
+---
+
+## Estado
+
+| # | Feature | Estado |
+|---|---|---|
+| 0 | Entorno local | ✅ terminado |
+| 1 | [Esqueleto del servicio](2026-08-04-esqueleto-servicio/) | ✅ terminado |
+| 2 | **Orden de compra** | ⚪ próximo |
+| 3 | Aprobación por monto | ⚪ pendiente |
+
+Dos features por delante. Todo lo demás del circuito —facturas, imputación, pagos,
+notificaciones— vive en core o en otros servicios: ver *Integración* más abajo.
+
+---
+
+## 0 — Entorno local ✅
+
+El stack de desarrollo (Consul, Zookeeper, Kafka y core) levanta y responde contra la base
+de desarrollo.
+
+Las notas de setup específicas de una máquina no van acá: viven en la guía local de cada
+desarrollador.
+
+## 1 — Esqueleto del servicio ✅
+
+`compras-service` levanta en 8203, se registra en Consul como `tesoreria-compras-service`,
+y consume un proveedor real de core por Feign. Molde: `umhub-service`.
+
+→ [`2026-08-04-esqueleto-servicio/`](2026-08-04-esqueleto-servicio/)
+
+## 2 — Orden de compra ⚪ próximo
+
+El concepto central. **No existe en core** — verificado: ni modelo, ni tabla, ni endpoint.
+
+Es **enteramente nuestro**: modelo de dominio, máquina de estados, persistencia en tablas
+propias, CRUD y consultas. Cubre:
+
+- Cabecera e ítems, con la imputación por ítem
+- Estados: `PENDIENTE_DE_APROBAR → APROBADA → ENVIADA`, más `CUMPLIDA`,
+  `FACTURA_PARCIAL`, `CUMPLIDA_PARCIAL` y `ANULADA`
+- Transiciones explícitas y validadas: **ningún estado se alcanza editando un campo**
+- Consultas por estado, proveedor, sede y rango de fechas
+- El detalle devuelve todo lo necesario en **una sola respuesta**, sin obligar al cliente
+  a llamadas adicionales
+
+**No depende de core.** La orden guarda `proveedorId` y `articuloId` como identificadores;
+resolverlos a nombres es presentación y se hace cuando haga falta, con el cliente Feign
+que ya existe. La orden **no valida contra core** que el proveedor exista: es una
+referencia, no una relación.
+
+Necesita tablas nuevas. Van al DBA con el circuito acordado: consensuar → documentar →
+pedir.
+
+**Falta definir:** el esquema de numeración de órdenes (B11).
+
+## 3 — Aprobación por monto ⚪
+
+Umbrales parametrizables y **versionados**: una orden se evalúa contra los umbrales
+vigentes a su fecha de emisión, no contra los de hoy. Tres niveles: DA → Secretario
+Administrativo o Gestión → Rector. Traza de aprobaciones y rechazos.
+
+Los cargos se modelan como **roles explícitos**, no como flags booleanos por acción.
+Verificado contra la base: hoy no existe ninguna tabla de roles, cargos ni perfiles en
+`tesium`. El feature define el catálogo de roles y su asignación a usuarios; es cambio de
+base y va al DBA.
+
+**Falta definir:** si el nivel 2 requiere uno solo de los dos cargos o ambos (B5).
+
+---
+
+## Integración — más adelante
+
+Nada de esto bloquea un feature. Se hace cuando haya algo concreto que integrar, y se
+valida en ese momento.
+
+### Ruta en el gateway
+
+Cuando el frontend necesite llegar a compras por el gateway. Va por PR desde un **fork**
+de `um.tesoreria.gateway-service`: acá tenemos permiso de lectura nomás.
+
+```yaml
+- id: tesoreria-compras-service
+  uri: lb://tesoreria-compras-service
+  predicates:
+    - Path=/api/tesoreria/compras/**
+```
+
+### El resto del circuito
+
+El documento fuente describe el circuito completo de la universidad, que va bastante más
+allá de este servicio. Estas piezas **viven en core o en otros servicios**, y sólo tienen
+sentido cuando la orden de compra exista y esté en uso:
+
+| Pieza | Dónde vive hoy | Qué haría falta |
+|---|---|---|
+| Conciliación de facturas | `ProveedorMovimiento`, en core | Vincular factura con orden; tolerancia y desvíos |
+| Imputación y centros de costo | Maestros en core | Tres niveles, bases de asignación |
+| Pagos y tesorería | `ProveedorPago`, en core — **Kotlin legacy sin controller REST** | Definir primero quién es dueño de la orden de pago |
+| Envío del PDF al proveedor | `report-service` (8281), `sender-service` (8188) | Revisar qué hace report antes de construir nada |
+| Notificaciones al proveedor | `sender-service` | Dos mails: orden aprobada y pago ejecutado |
+
+No están numeradas a propósito. Cuando alguna se vuelva trabajo real, se le abre carpeta y
+entra al roadmap.
+
+---
+
+## Falta definir
+
+Sólo lo que frena los dos features de arriba.
+
+| # | Qué | Frena |
+|---|---|---|
+| **B11** | Numeración de órdenes: ¿global, por sede, por año? ¿Quién es dueño de la secuencia? | Feature 2 |
+| **B5** | El *"y/o"* del nivel 2: ¿aprueba uno solo o hacen falta los dos? | Feature 3 |
+
+Lo que se puede mirar sin preguntarle a nadie, y conviene hacer antes de diseñar los
+endpoints del feature 2:
+
+- Qué API consume el `tesoreria-compras-client` que ya existe (puerto 4201). O ya le habla
+  a core, o espera un contrato, o es un stub.
+
+## Ya resuelto
+
+| # | Resolución |
+|---|---|
+| B2 | Los cargos van como roles explícitos, no flags. Identidad por `google_mail` |
+| B3 | La ruta del gateway es integración posterior, no bloqueo |
+| B4 | El DBA crea las tablas (D9) |
+| B10 | Puerto 8203, verificado libre |
+
+---
+
+## Cómo abrir un feature nuevo
+
+1. Crear `specs/YYYY-MM-DD-nombre/` con la fecha en que se empieza.
+2. Adentro: `requirements.md` (qué hace, con sus `REQ-*`), `plan.md` (tareas) y
+   `validation.md` (criterios).
+3. Actualizar la tabla de estado.
+4. Lo global no se repite: se referencia.
+
+**Antes de agregar un feature, la pregunta es una sola:** ¿lo puedo construir y validar
+con mi propio código? Si la respuesta es no, es integración.

@@ -1,0 +1,30 @@
+name: tesoreria-compras
+
+services:
+  tesoreria-compras-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8203:8203"
+    environment:
+      APP_PORT: 8203
+      APP_NAME: tesoreria-compras-service
+      APP_CONSUL_HOST: consul-service
+      APP_CONSUL_PORT: 8500
+      APP_LOGGING: info
+      APP_FEIGN_CONNECT_TIMEOUT: 10000
+      APP_FEIGN_READ_TIMEOUT: 15000
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8203/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - tesoreria-shared
+    restart: unless-stopped
+
+networks:
+  tesoreria-shared:
+    external: true
