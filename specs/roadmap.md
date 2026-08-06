@@ -20,7 +20,7 @@ Cada feature abre su carpeta `specs/YYYY-MM-DD-nombre/` cuando se empieza a trab
 |---|---|---|
 | 0 | Entorno local | ✅ terminado |
 | 1 | [Esqueleto del servicio](2026-08-04-esqueleto-servicio/) | ✅ terminado |
-| 2 | **Orden de compra** | ⚪ próximo |
+| 2 | [Orden de compra](2026-08-05-orden-de-compra/) | 🟡 planificado |
 | 3 | Aprobación por monto | ⚪ pendiente |
 
 Dos features por delante. Todo lo demás del circuito —facturas, imputación, pagos,
@@ -66,7 +66,7 @@ referencia, no una relación.
 Necesita tablas nuevas. Van al DBA con el circuito acordado: consensuar → documentar →
 pedir.
 
-**Falta definir:** el esquema de numeración de órdenes (B11).
+**Numeración resuelta:** `OC-AAAA-NNNNNN`, anual y global, generada por este servicio.
 
 ## 3 — Aprobación por monto ⚪
 
@@ -125,7 +125,6 @@ Sólo lo que frena los dos features de arriba.
 
 | # | Qué | Frena |
 |---|---|---|
-| **B11** | Numeración de órdenes: ¿global, por sede, por año? ¿Quién es dueño de la secuencia? | Feature 2 |
 | **B5** | El *"y/o"* del nivel 2: ¿aprueba uno solo o hacen falta los dos? | Feature 3 |
 
 Lo que se puede mirar sin preguntarle a nadie, y conviene hacer antes de diseñar los
@@ -138,6 +137,7 @@ endpoints del feature 2:
 
 | # | Resolución |
 |---|---|
+| B11 | Las órdenes usan `OC-AAAA-NNNNNN`: correlativo global que reinicia cada año y es generado por `compras-service`. Ejemplo: `OC-2026-000001`. |
 | B2 | Los cargos van como roles explícitos, no flags. Identidad por `google_mail` |
 | B3 | La ruta del gateway es integración posterior, no bloqueo |
 | B4 | El DBA crea las tablas (D9) |

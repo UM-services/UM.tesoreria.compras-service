@@ -1,0 +1,22 @@
+sequenceDiagram
+    actor Cliente
+    participant API as OrdenCompraController
+    participant CasoUso as CrearOrdenCompraUseCase
+    participant Dominio as OrdenCompra
+    participant Repo as OrdenCompraRepository
+    participant DB as Base de compras
+
+    Cliente->>API: POST /api/tesoreria/compras/ordenCompra
+    API->>CasoUso: crear(dto mapeado a comando)
+    CasoUso->>Dominio: crear, calcular total y asignar PENDIENTE_DE_APROBAR
+    CasoUso->>Repo: reservar siguiente número anual
+    Repo->>DB: secuencia transaccional OC-AAAA-NNNNNN
+    DB-->>Repo: número reservado
+    CasoUso->>Repo: guardar orden, ítems e imputaciones
+    Repo->>DB: persistir tablas propias
+    DB-->>Repo: orden guardada
+    Repo-->>CasoUso: OrdenCompra
+    CasoUso-->>API: OrdenCompra
+    API-->>Cliente: 201 detalle completo
+
+    Note over CasoUso,DB: No se consulta ni se escribe core-service

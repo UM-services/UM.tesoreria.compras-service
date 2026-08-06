@@ -1,0 +1,16 @@
+flowchart LR
+    Web[OrdenCompraController\nDTOs y validación] --> Service[OrdenCompraService]
+    Service --> UseCases[Casos de uso\ncrear, consultar, listar, actualizar, transicionar]
+    UseCases --> Domain[Dominio OrdenCompra\nítems, imputaciones, total, estados]
+    UseCases --> Port[Puerto OrdenCompraRepository]
+    Port <-->|implementa| Adapter[Adapter JPA]
+    Adapter --> Mapper[Mapper entidad-dominio]
+    Mapper --> Entities[Entidades JPA]
+    Entities --> DB[(Tablas propias de compras)]
+
+    classDef domain fill:#e8f5e9,stroke:#2e7d32;
+    classDef application fill:#e3f2fd,stroke:#1565c0;
+    classDef infrastructure fill:#fff3e0,stroke:#ef6c00;
+    class Domain,Port domain;
+    class Service,UseCases application;
+    class Web,Adapter,Mapper,Entities,DB infrastructure;
