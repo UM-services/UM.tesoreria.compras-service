@@ -78,10 +78,10 @@ anual propiedad de compras, de modo que dos altas concurrentes no repitan
 
 ## T5 — Calidad y documentación `[compras]`
 
-- [ ] 5.1 Cubrir reglas de total, numeración y todas las transiciones del dominio con tests
+- [x] 5.1 Cubrir reglas de total, numeración y todas las transiciones del dominio con tests
       unitarios.
-- [ ] 5.2 Cubrir casos de uso mockeando el puerto de salida, y mappers con datos de borde.
-- [ ] 5.3 Ejecutar tests, verificación JaCoCo, compilación y las puertas de
+- [x] 5.2 Cubrir casos de uso mockeando el puerto de salida, y mappers con datos de borde.
+- [x] 5.3 Ejecutar tests, verificación JaCoCo, compilación y las puertas de
       [validation.md](validation.md).
 - [x] 5.4 Mantener el caso de uso, diagramas de secuencia y hexagonal sincronizados con la
       implementación.

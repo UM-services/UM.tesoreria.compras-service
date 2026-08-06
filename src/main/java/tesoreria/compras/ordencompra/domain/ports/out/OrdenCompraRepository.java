@@ -9,6 +9,7 @@ public interface OrdenCompraRepository {
     long reservarSiguienteNumero(int anio);
     OrdenCompra save(OrdenCompra ordenCompra);
     Optional<OrdenCompra> findById(Long id);
+    Optional<OrdenCompra> findByIdForUpdate(Long id);
     Optional<OrdenCompra> findByNumero(String numero);
     List<OrdenCompra> findByCriteria(OrdenCompraCriteria criteria);
 }

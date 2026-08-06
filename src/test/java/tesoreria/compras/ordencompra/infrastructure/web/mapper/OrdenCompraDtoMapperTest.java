@@ -1,0 +1,3 @@
+package tesoreria.compras.ordencompra.infrastructure.web.mapper;
+import org.junit.jupiter.api.Test; import tesoreria.compras.ordencompra.OrdenCompraFixture; import tesoreria.compras.ordencompra.infrastructure.web.dto.*; import java.math.BigDecimal; import java.util.List; import static org.assertj.core.api.Assertions.*;
+class OrdenCompraDtoMapperTest { @Test void mapsBothBoundaries(){var m=new OrdenCompraDtoMapper();var request=new OrdenCompraItemRequest(10,"Papel",new BigDecimal("2"),new BigDecimal("12.50"),20L);assertThat(m.toItems(List.of(request))).containsExactly(OrdenCompraFixture.item());var response=m.toResponse(OrdenCompraFixture.pendiente());assertThat(response.total()).isEqualByComparingTo("25.00");assertThat(response.items()).hasSize(1);} }
