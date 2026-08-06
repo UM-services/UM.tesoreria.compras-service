@@ -1,0 +1,3 @@
+package tesoreria.compras.ordencompra.application.usecases;
+import lombok.RequiredArgsConstructor; import org.springframework.stereotype.Component; import tesoreria.compras.ordencompra.domain.model.OrdenCompra; import tesoreria.compras.ordencompra.domain.ports.in.GetOrdenCompraUseCase; import tesoreria.compras.ordencompra.domain.ports.out.OrdenCompraRepository;
+@Component @RequiredArgsConstructor public class GetOrdenCompraUseCaseImpl implements GetOrdenCompraUseCase { private final OrdenCompraRepository repository; public OrdenCompra get(Long id){return repository.findById(id).orElseThrow(()->new IllegalArgumentException("No existe la orden de compra "+id));} }

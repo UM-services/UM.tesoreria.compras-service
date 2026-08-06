@@ -1,0 +1,3 @@
+package tesoreria.compras.ordencompra.application.usecases;
+import lombok.RequiredArgsConstructor; import org.springframework.stereotype.Component; import tesoreria.compras.ordencompra.domain.model.*; import tesoreria.compras.ordencompra.domain.ports.in.TransitionOrdenCompraUseCase; import tesoreria.compras.ordencompra.domain.ports.out.OrdenCompraRepository;
+@Component @RequiredArgsConstructor public class TransitionOrdenCompraUseCaseImpl implements TransitionOrdenCompraUseCase { private final OrdenCompraRepository repository; public OrdenCompra transition(Long id,OrdenCompraEstado e){var orden=repository.findById(id).orElseThrow(()->new IllegalArgumentException("No existe la orden de compra "+id));return repository.save(orden.transicionarA(e));} }

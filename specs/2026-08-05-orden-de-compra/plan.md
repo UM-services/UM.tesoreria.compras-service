@@ -41,40 +41,40 @@ anual propiedad de compras, de modo que dos altas concurrentes no repitan
 
 ## T1 — Contrato de datos y base `[compras]` / `[DBA]`
 
-- [ ] 1.1 Definir atributos obligatorios de cabecera, ítem e imputación y el contrato de
+- [x] 1.1 Definir atributos obligatorios de cabecera, ítem e imputación y el contrato de
       los DTOs, sin incorporar datos maestros de core.
-- [ ] 1.2 Elaborar el documento de cambio de base: tablas, columnas, tipos, claves,
+- [x] 1.2 Elaborar el documento de cambio de base: tablas, columnas, tipos, claves,
       índices, restricciones, secuencia anual y justificación por caso de uso.
 - [ ] 1.3 Consensuar el DDL y solicitar al DBA su aplicación; mantener `ddl-auto: none`.
-- [ ] 1.4 Incorporar las dependencias de MySQL/JPA y la configuración por variables que
+- [x] 1.4 Incorporar las dependencias de MySQL/JPA y la configuración por variables que
       correspondan, sin valores de conexión versionados.
 
 ## T2 — Dominio y casos de uso `[compras]`
 
-- [ ] 2.1 Modelar `OrdenCompra`, `OrdenCompraItem`, imputación, estado y reglas de total.
-- [ ] 2.2 Implementar la máquina de estados y sus transiciones explícitas con excepciones
+- [x] 2.1 Modelar `OrdenCompra`, `OrdenCompraItem`, imputación, estado y reglas de total.
+- [x] 2.2 Implementar la máquina de estados y sus transiciones explícitas con excepciones
       de dominio para transiciones inválidas.
-- [ ] 2.3 Definir un puerto de entrada por operación: crear, obtener, listar, actualizar,
+- [x] 2.3 Definir un puerto de entrada por operación: crear, obtener, listar, actualizar,
       aprobar, enviar, registrar cumplimiento/factura parcial y anular.
-- [ ] 2.4 Definir el puerto de repositorio, incluida la reserva atómica de numeración anual.
-- [ ] 2.5 Implementar los casos de uso y la fachada de aplicación como delegaciones.
+- [x] 2.4 Definir el puerto de repositorio, incluida la reserva atómica de numeración anual.
+- [x] 2.5 Implementar los casos de uso y la fachada de aplicación como delegaciones.
 
 ## T3 — Persistencia `[compras]`
 
-- [ ] 3.1 Crear entidades JPA de cabecera, ítems, imputaciones y secuencia, separadas del
+- [x] 3.1 Crear entidades JPA de cabecera, ítems, imputaciones y secuencia, separadas del
       dominio.
-- [ ] 3.2 Implementar repositorios Spring Data, mapper entidad↔dominio y el adapter del
+- [x] 3.2 Implementar repositorios Spring Data, mapper entidad↔dominio y el adapter del
       puerto de salida.
-- [ ] 3.3 Configurar la lectura de detalle para recuperar ítems e imputaciones sin N+1.
-- [ ] 3.4 Implementar filtros opcionales y rango inclusivo de fecha de emisión.
+- [x] 3.3 Configurar la lectura de detalle para recuperar ítems e imputaciones sin N+1.
+- [x] 3.4 Implementar filtros opcionales y rango inclusivo de fecha de emisión.
 
 ## T4 — API HTTP `[compras]`
 
-- [ ] 4.1 Crear los DTOs request/response y mappers dominio↔DTO.
-- [ ] 4.2 Exponer CRUD lógico, consultas y comandos de transición bajo
+- [x] 4.1 Crear los DTOs request/response y mappers dominio↔DTO.
+- [x] 4.2 Exponer CRUD lógico, consultas y comandos de transición bajo
       `/api/tesoreria/compras/ordenCompra`.
-- [ ] 4.3 Agregar validación de requests y un manejador de errores de dominio consistente.
-- [ ] 4.4 Documentar el contrato en OpenAPI y verificar que no existen rutas duales.
+- [x] 4.3 Agregar validación de requests y un manejador de errores de dominio consistente.
+- [x] 4.4 Documentar el contrato en OpenAPI y verificar que no existen rutas duales.
 
 ## T5 — Calidad y documentación `[compras]`
 
@@ -83,7 +83,7 @@ anual propiedad de compras, de modo que dos altas concurrentes no repitan
 - [ ] 5.2 Cubrir casos de uso mockeando el puerto de salida, y mappers con datos de borde.
 - [ ] 5.3 Ejecutar tests, verificación JaCoCo, compilación y las puertas de
       [validation.md](validation.md).
-- [ ] 5.4 Mantener el caso de uso, diagramas de secuencia y hexagonal sincronizados con la
+- [x] 5.4 Mantener el caso de uso, diagramas de secuencia y hexagonal sincronizados con la
       implementación.
 
 ## Riesgos y decisiones

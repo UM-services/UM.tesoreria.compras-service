@@ -17,6 +17,8 @@ La orden se desarrolla y valida sin depender de datos ni cambios en `core-servic
 Las órdenes se identifican públicamente como **`OC-AAAA-NNNNNN`**. El correlativo es
 global para todo el servicio, reinicia cada año calendario y lo genera
 `compras-service` de forma transaccional. Ejemplo: `OC-2026-000001`.
+El año se toma de la fecha de emisión al crear la orden y queda inmutable junto con el
+número público.
 
 No se numera por sede: una referencia global es más simple de comunicar, auditar y buscar;
 la sede sigue siendo un atributo consultable de la orden. La secuencia es propiedad de

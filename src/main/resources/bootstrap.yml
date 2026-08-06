@@ -15,6 +15,14 @@ server:
 spring:
   application:
     name: ${app.name}
+  datasource:
+    url: ${APP_DB_URL:}
+    username: ${APP_DB_USERNAME:}
+    password: ${APP_DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
   cloud:
     consul:
       host: ${app.consul.host}
