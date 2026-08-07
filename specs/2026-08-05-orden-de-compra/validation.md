@@ -70,3 +70,35 @@ El feature queda cerrado sólo cuando pasan estos criterios y las puertas de cal
 2. Las puertas A1 a A6, T1 a T5, D1 a D3 y O1 pasan.
 3. Los documentos y diagramas se actualizan en el mismo cambio que el código.
 4. La feature 2 se marca como terminada en el roadmap.
+
+---
+
+## Qué NO prueba esta validación
+
+Todo lo de arriba está en verde, y eso puede leerse como "esto ya funciona". No es así, y
+conviene que el límite quede escrito acá y no lo descubra alguien más tarde.
+
+**El servicio nunca corrió contra `tesium`.** Las pruebas levantan un MySQL de
+Testcontainers con el DDL *propuesto*, el que todavía no consensuó el DBA (T1.3 sigue
+abierta). Hasta que el esquema esté aplicado, "anda" quiere decir "anda contra el esquema
+que definimos nosotros". Si el DBA lo ajusta, hay que actualizar
+`compra-orden-ddl.sql` y volver a correr: las pruebas van a seguir en verde igual, pero
+contra el esquema equivocado.
+
+**Ningún cliente real lo llamó.** No hay frontend conectado ni ruta de gateway. Los
+endpoints están probados de extremo a extremo dentro del propio proceso
+(`ArranqueAplicacionIT` con servidor HTTP real), que es bastante más que un mock, pero
+nadie fuera del servicio los consumió todavía. El contrato no pasó por un consumidor de
+verdad.
+
+**No prueba el arranque con variables de entorno faltantes.** `ArranqueAplicacionIT` cubre
+O1, pero `@ServiceConnection` reemplaza el datasource por el del contenedor, así que el
+default vacío de `APP_DB_URL` en `bootstrap.yml` nunca se ejercita. Un despliegue sin esa
+variable seguiría fallando al arrancar con un error poco claro. Eso se cubre con un smoke
+test post-deploy contra `/actuator/health`, y va con el trabajo de despliegue, no con esta
+feature.
+
+**Qué sí prueban.** Las reglas de negocio, la máquina de estados, la aritmética de
+importes, la numeración concurrente, la identidad de los ítems entre estados y el cableado
+de la aplicación. Es cobertura real sobre decisiones nuestras; no es evidencia sobre el
+entorno de producción.
