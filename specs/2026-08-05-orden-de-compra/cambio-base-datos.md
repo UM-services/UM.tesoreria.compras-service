@@ -35,3 +35,8 @@ CREATE TABLE compra_orden_item (
 
 `compra_orden_secuencia` guarda el correlativo anual. La reserva usa el incremento atómico
 de MySQL con `LAST_INSERT_ID`, por lo que altas concurrentes no repiten un número.
+
+El archivo `src/test/resources/db/compra-orden-ddl.sql` es una copia literal de este DDL y es
+lo que levanta `OrdenCompraPersistenciaIT` en un MySQL de Testcontainers. Si el DBA aplica algo
+distinto, hay que actualizar esa copia: es lo único que verifica que las entidades JPA y la
+reserva con `LAST_INSERT_ID` calzan con el esquema real.

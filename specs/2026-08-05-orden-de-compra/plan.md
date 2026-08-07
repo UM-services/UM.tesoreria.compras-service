@@ -82,16 +82,25 @@ anual propiedad de compras, de modo que dos altas concurrentes no repitan
       unitarios.
 - [x] 5.2 Cubrir casos de uso mockeando el puerto de salida, y mappers con datos de borde.
 - [x] 5.3 Ejecutar tests, verificación JaCoCo, compilación y las puertas de
-      [validation.md](validation.md).
+      [validation.md](validation.md). `./mvnw verify` pasa: 50 tests unitarios, 8 de
+      integración contra MySQL real y JaCoCo en 98,86 % de líneas y 82,22 % de ramas.
 - [x] 5.4 Mantener el caso de uso, diagramas de secuencia y hexagonal sincronizados con la
       implementación.
+- [x] 5.5 Versionar el wrapper `mvnw` para que las puertas se puedan correr desde un clon limpio.
+- [x] 5.6 Prueba de integración con Testcontainers sobre el DDL solicitado al DBA: numeración
+      concurrente, identidad de ítems entre estados, rango inclusivo y paginado.
+- [x] 5.7 `ArranqueAplicacionIT`: levanta la aplicación completa contra MySQL real y verifica
+      health, ruta canónica, 404/400 de extremo a extremo y publicación de OpenAPI (puerta O1).
+- [x] 5.8 CI en GitHub Actions corriendo `./mvnw verify` con `REQUIRE_DOCKER=true`, para que
+      las pruebas de integración no puedan saltearse en silencio.
 
 ## Riesgos y decisiones
 
 | Tema | Decisión / mitigación |
 |---|---|
 | B11 | Resuelto: `OC-AAAA-NNNNNN`, secuencia global anual generada transaccionalmente por compras-service. |
-| Concurrencia | La reserva de número ocurre en la transacción de creación y tiene restricción única en base. |
+| Concurrencia | La reserva de número ocurre en la transacción de creación y tiene restricción única en base. Verificado con 24 altas concurrentes contra MySQL real. |
+| Listado | Siempre paginado, tope de 200 por página. La página se resuelve con LIMIT sobre la cabecera y los ítems se traen aparte, para no paginar en memoria. |
 | Datos externos | Sólo se guardan IDs; no hay FKs ni llamadas a core durante alta/edición. |
 | DDL | El DBA aplica tablas tras recibir el documento; Hibernate no administra esquema. |
 | Autorización | Feature 2 preserva las transiciones; feature 3 agrega decisión por monto y rol. |
