@@ -24,7 +24,14 @@ en el mismo cambio que el código.
 - Usar rutas canónicas bajo `/api/tesoreria/compras/...`.
 - No permitir que Hibernate modifique el esquema (`ddl-auto: none`). Los cambios de base
   se documentan y se solicitan al DBA.
-- Mantener cobertura unitaria mínima de 80% con JaCoCo y un check que falle el build.
+- Mantener las puertas de JaCoCo que fallan el build: 80% de línea y 75% de rama sobre el
+  bundle, y un piso por clase de 70% de línea. La cobertura se mide sobre código con una
+  sentencia por línea; colapsar sentencias infla el ratio sin agregar pruebas.
+- Anotar cada cambio con impacto en `CHANGELOG.md`, en el mismo commit que el código.
+  Formato Keep a Changelog: lo que todavía no se publica va bajo `## [Sin publicar]`, y al
+  versionar se mueve a su número junto con `VERSION` y el `<version>` del `pom.xml`. El
+  changelog es de este repositorio: los hallazgos sobre `core-service` u otros servicios
+  van en `specs/`.
 
 ## Git y Conductor
 
