@@ -1,3 +1,21 @@
 package tesoreria.compras.ordencompra.application.usecases;
-import lombok.RequiredArgsConstructor; import org.springframework.stereotype.Component; import tesoreria.compras.ordencompra.domain.exception.OrdenCompraNotFoundException; import tesoreria.compras.ordencompra.domain.model.OrdenCompra; import tesoreria.compras.ordencompra.domain.ports.in.GetOrdenCompraByNumeroUseCase; import tesoreria.compras.ordencompra.domain.ports.out.OrdenCompraRepository;
-@Component @RequiredArgsConstructor public class GetOrdenCompraByNumeroUseCaseImpl implements GetOrdenCompraByNumeroUseCase { private final OrdenCompraRepository repository; public OrdenCompra getByNumero(String n){return repository.findByNumero(n).orElseThrow(()->new OrdenCompraNotFoundException(n));} }
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import tesoreria.compras.ordencompra.domain.exception.OrdenCompraNotFoundException;
+import tesoreria.compras.ordencompra.domain.model.OrdenCompra;
+import tesoreria.compras.ordencompra.domain.ports.in.GetOrdenCompraByNumeroUseCase;
+import tesoreria.compras.ordencompra.domain.ports.out.OrdenCompraRepository;
+
+@Component
+@RequiredArgsConstructor
+public class GetOrdenCompraByNumeroUseCaseImpl implements GetOrdenCompraByNumeroUseCase {
+
+    private final OrdenCompraRepository repository;
+
+    @Override
+    public OrdenCompra getByNumero(String numero) {
+        return repository.findByNumero(numero)
+                .orElseThrow(() -> new OrdenCompraNotFoundException(numero));
+    }
+}
