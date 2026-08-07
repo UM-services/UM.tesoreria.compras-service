@@ -60,7 +60,7 @@ El feature queda cerrado sólo cuando pasan estos criterios y las puertas de cal
 |---|---|
 | D1 | Caso de uso de alta, consulta y transición actualizado. |
 | D2 | Diagrama de secuencia y diagrama hexagonal reflejan las capas y el circuito de persistencia. |
-| D3 | El documento para DBA lista DDL, propósito y casos de uso antes de solicitar cambios. |
+| D3 | El documento para DBA explica propósito, campos, tipos y casos de uso, y apunta al DDL. El `CREATE TABLE` vive sólo en `src/test/resources/db/compra-orden-ddl.sql`: el mismo archivo que se le pide al DBA es el que levantan las pruebas, así que no hay dos copias que sincronizar. |
 | O1 | Con una base que contiene el DDL aprobado, el servicio arranca sin intentar modificar el esquema. Verificado por `ArranqueAplicacionIT`: levanta la aplicación entera (`@SpringBootTest`, servidor HTTP real) contra MySQL con `ddl-auto=none`, responde `/actuator/health` UP y sirve la ruta canónica. |
 | O2 | El contrato OpenAPI se publica en `/v3/api-docs` e incluye la ruta de orden de compra. Verificado en `ArranqueAplicacionIT`. |
 
