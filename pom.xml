@@ -67,6 +67,26 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-mysql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
@@ -131,6 +151,23 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <!--
+                Los *IT necesitan Docker y corren en verify, aparte de los unitarios.
+                La puerta de JaCoCo se evalua en package, antes: la cobertura del 80 %
+                tiene que salir de los tests unitarios y no depender de Docker.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -156,12 +193,16 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
+                            <!--
+                                JaCoCo compara estos patrones contra la ruta del .class:
+                                sin el sufijo .class no excluyen nada y la regla por CLASS
+                                falla sobre codigo que nadie pensaba cubrir.
+                            -->
                             <excludes>
-                                <exclude>**/*Application</exclude>
-                                <exclude>**/configuration/**</exclude>
-                                <exclude>**/infrastructure/web/dto/**</exclude>
-                                <exclude>**/infrastructure/persistence/entity/**</exclude>
-                                <exclude>**/infrastructure/client/*Response</exclude>
+                                <exclude>**/*Application.class</exclude>
+                                <exclude>**/configuration/**/*.class</exclude>
+                                <exclude>**/infrastructure/web/dto/**/*.class</exclude>
+                                <exclude>**/infrastructure/client/*Response.class</exclude>
                             </excludes>
                             <rules>
                                 <rule>
@@ -171,6 +212,25 @@
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
                                             <minimum>0.80</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.75</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <!--
+                                    Piso por clase: el promedio del BUNDLE puede tapar una capa
+                                    entera sin cubrir. Esta regla la deja en evidencia.
+                                -->
+                                <rule>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
