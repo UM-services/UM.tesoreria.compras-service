@@ -8,10 +8,10 @@ sincronizados: `VERSION` es lo que lee el flujo de release, `pom.xml` lo que lee
 
 ---
 
-## [Sin publicar]
+## [0.2.0] - 2026-08-07
 
-Feature 2 — orden de compra. No se versiona todavía: el cierre depende de que el DBA
-consensúe el esquema (T1.3).
+Feature 2 — orden de compra. La versión refleja el código entregado; el cierre formal de
+la feature todavía depende de que el DBA consensúe el esquema (T1.3).
 
 ### Agregado
 
@@ -66,18 +66,3 @@ Primer esqueleto ejecutable del servicio.
   core por Feign y Consul.
 - Traducción de errores de Feign dentro del adapter: proveedor inexistente responde `404`
   y core no disponible responde `503`.
-
-### Verificado contra el código y la base de `core-service`
-
-- **`OrdenCompra` no existe en core**: ni modelo, ni tabla, ni endpoint. Es la brecha real
-  que justifica este servicio.
-- **Core está al 70% hexagonal** (1018 de 1460 archivos Java). El 30% restante es legacy,
-  más 70 archivos Kotlin.
-- **`ProveedorPago` (la orden de pago) no es consumible**: es Kotlin legacy, sin controller
-  REST. Bloquea el feature de pagos.
-- **La ruta dual de core es un artefacto de su migración**, no una convención: los módulos
-  más nuevos usan ruta única. Este servicio usa `/api/tesoreria/compras/...`.
-- **Los cargos se modelan como roles explícitos**, no como flags por acción.
-- **El gateway no tiene las rutas de compras.** Hay que agregarlas.
-- Core no exige `X-API-Key` para proveedores; el contrato usa camelCase y `habilitado`
-  numérico.

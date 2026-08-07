@@ -43,7 +43,7 @@ y consume un proveedor real de core por Feign. Molde: `umhub-service`.
 
 → [`2026-08-04-esqueleto-servicio/`](2026-08-04-esqueleto-servicio/)
 
-## 2 — Orden de compra ⚪ próximo
+## 2 — Orden de compra 🟡
 
 El concepto central. **No existe en core** — verificado: ni modelo, ni tabla, ni endpoint.
 
@@ -87,6 +87,15 @@ base y va al DBA.
 
 Nada de esto bloquea un feature. Se hace cuando haya algo concreto que integrar, y se
 valida en ese momento.
+
+### Estado de core-service
+
+Relevado al construir el esqueleto (feature 1), útil para dimensionar cualquier integración:
+
+- Core está al **70% hexagonal** (1018 de 1460 archivos Java). El 30% restante es legacy,
+  más 70 archivos Kotlin.
+- Core **no exige `X-API-Key`** para proveedores. El `ApiKeyFilter` es propio de umhub;
+  core no tiene ese filtro. Su contrato usa camelCase y `habilitado` numérico.
 
 ### Ruta en el gateway
 
