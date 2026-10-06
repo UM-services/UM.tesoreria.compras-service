@@ -1,0 +1,59 @@
+```mermaid
+graph TD
+    A["Cliente (API / Gateway)"]
+
+    subgraph "Infrastructure: Web"
+        B["ApiKeyFilter<br/>X-API-Key"]
+        C["ArticuloController"]
+        C2["ProveedorPingController"]
+        D["DTOs + *DtoMapper"]
+    end
+
+    subgraph "Application"
+        E["ArticuloService"]
+        E2["ProveedorService"]
+        F["GetArticuloByIdUseCaseImpl"]
+        F2["SearchArticulosUseCaseImpl"]
+        F3["GetProveedorByIdUseCaseImpl"]
+    end
+
+    subgraph "Domain (sin frameworks)"
+        G["Modelo: Articulo, ArticuloSearch, Cuenta"]
+        G2["Modelo: Proveedor, CuentaContable"]
+        H["Ports In: *UseCase"]
+        I["Ports Out: ArticuloGateway, ProveedorGateway"]
+    end
+
+    subgraph "Infrastructure: Client (Feign)"
+        J["CoreArticuloFeignClientAdapter"]
+        J2["CoreProveedorFeignClientAdapter"]
+        K["*Response (contratos de core)"]
+    end
+
+    L["Consul"]
+    M["core-service:8092"]
+
+    A -->|"header X-API-Key"| B
+    B --> C
+    B --> C2
+    C --> D
+    C2 --> D
+    C --> E
+    C2 --> E2
+    E --> F
+    E --> F2
+    E2 --> F3
+    F -.-> H
+    F2 -.-> H
+    F3 -.-> H
+    E --> I
+    E2 --> I
+    I -.-> J
+    I -.-> J2
+    J --> K
+    J2 --> K
+    J -->|"resolver tesoreria-core-service"| L
+    J2 -->|"resolver tesoreria-core-service"| L
+    J --> M
+    J2 --> M
+```

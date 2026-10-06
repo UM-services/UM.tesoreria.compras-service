@@ -2,7 +2,6 @@
 
 Lo que este servicio construye, en orden.
 
-- El **por qué** y el alcance → [mission.md](mission.md)
 - El **cómo** → [tech-stack.md](tech-stack.md)
 
 **Sólo entra al roadmap lo que este servicio puede construir y validar solo.** Lo que
@@ -20,11 +19,10 @@ Cada feature abre su carpeta `specs/YYYY-MM-DD-nombre/` cuando se empieza a trab
 |---|---|---|
 | 0 | Entorno local | ✅ terminado |
 | 1 | [Esqueleto del servicio](2026-08-04-esqueleto-servicio/) | ✅ terminado |
-| 2 | [Orden de compra](2026-08-05-orden-de-compra/) | 🟡 planificado |
-| 3 | Aprobación por monto | ⚪ pendiente |
 
-Dos features por delante. Todo lo demás del circuito —facturas, imputación, pagos,
-notificaciones— vive en core o en otros servicios: ver *Integración* más abajo.
+El plan de features se redefine con el nuevo alcance. Todo lo demás del circuito
+—facturas, imputación, pagos, notificaciones— vive en core o en otros servicios: ver
+*Integración* más abajo.
 
 ---
 
@@ -38,48 +36,10 @@ desarrollador.
 
 ## 1 — Esqueleto del servicio ✅
 
-`compras-service` levanta en 8203, se registra en Consul como `tesoreria-compras-service`,
+`compras-service` levanta en 8096, se registra en Consul como `tesoreria-compras-service`,
 y consume un proveedor real de core por Feign. Molde: `umhub-service`.
 
 → [`2026-08-04-esqueleto-servicio/`](2026-08-04-esqueleto-servicio/)
-
-## 2 — Orden de compra 🟡
-
-El concepto central. **No existe en core** — verificado: ni modelo, ni tabla, ni endpoint.
-
-Es **enteramente nuestro**: modelo de dominio, máquina de estados, persistencia en tablas
-propias, CRUD y consultas. Cubre:
-
-- Cabecera e ítems, con la imputación por ítem
-- Estados: `PENDIENTE_DE_APROBAR → APROBADA → ENVIADA`, más `CUMPLIDA`,
-  `FACTURA_PARCIAL`, `CUMPLIDA_PARCIAL` y `ANULADA`
-- Transiciones explícitas y validadas: **ningún estado se alcanza editando un campo**
-- Consultas por estado, proveedor, sede y rango de fechas
-- El detalle devuelve todo lo necesario en **una sola respuesta**, sin obligar al cliente
-  a llamadas adicionales
-
-**No depende de core.** La orden guarda `proveedorId` y `articuloId` como identificadores;
-resolverlos a nombres es presentación y se hace cuando haga falta, con el cliente Feign
-que ya existe. La orden **no valida contra core** que el proveedor exista: es una
-referencia, no una relación.
-
-Necesita tablas nuevas. Van al DBA con el circuito acordado: consensuar → documentar →
-pedir.
-
-**Numeración resuelta:** `OC-AAAA-NNNNNN`, anual y global, generada por este servicio.
-
-## 3 — Aprobación por monto ⚪
-
-Umbrales parametrizables y **versionados**: una orden se evalúa contra los umbrales
-vigentes a su fecha de emisión, no contra los de hoy. Tres niveles: DA → Secretario
-Administrativo o Gestión → Rector. Traza de aprobaciones y rechazos.
-
-Los cargos se modelan como **roles explícitos**, no como flags booleanos por acción.
-Verificado contra la base: hoy no existe ninguna tabla de roles, cargos ni perfiles en
-`tesium`. El feature define el catálogo de roles y su asignación a usuarios; es cambio de
-base y va al DBA.
-
-**Falta definir:** si el nivel 2 requiere uno solo de los dos cargos o ambos (B5).
 
 ---
 
@@ -99,8 +59,8 @@ Relevado al construir el esqueleto (feature 1), útil para dimensionar cualquier
 
 ### Ruta en el gateway
 
-Cuando el frontend necesite llegar a compras por el gateway. Va por PR desde un **fork**
-de `um.tesoreria.gateway-service`: acá tenemos permiso de lectura nomás.
+Resuelta: la ruta vive en el `bootstrap.yml` de `um.tesoreria.gateway-service` (repo
+aparte), delante de los demás servicios de tesorería.
 
 ```yaml
 - id: tesoreria-compras-service
@@ -109,19 +69,26 @@ de `um.tesoreria.gateway-service`: acá tenemos permiso de lectura nomás.
     - Path=/api/tesoreria/compras/**
 ```
 
+### Maestro de artículos
+
+Resuelta: el slice `articulo` consume el maestro de `core-service` por Feign
+(`GET /api/tesoreria/core/articulo/{id}`, `POST /api/tesoreria/core/articulo/search`),
+con el mismo patrón que el proveedor: puerto de salida propio y adapter que traduce los
+errores de Feign. Queda disponible para resolver nombres de artículos.
+
 ### El resto del circuito
 
 El documento fuente describe el circuito completo de la universidad, que va bastante más
 allá de este servicio. Estas piezas **viven en core o en otros servicios**, y sólo tienen
-sentido cuando la orden de compra exista y esté en uso:
+sentido cuando alguna se vuelva trabajo real:
 
 | Pieza | Dónde vive hoy | Qué haría falta |
 |---|---|---|
-| Conciliación de facturas | `ProveedorMovimiento`, en core | Vincular factura con orden; tolerancia y desvíos |
+| Conciliación de facturas | `ProveedorMovimiento`, en core | Vincular las facturas con la operación; tolerancia y desvíos |
 | Imputación y centros de costo | Maestros en core | Tres niveles, bases de asignación |
 | Pagos y tesorería | `ProveedorPago`, en core — **Kotlin legacy sin controller REST** | Definir primero quién es dueño de la orden de pago |
 | Envío del PDF al proveedor | `report-service` (8281), `sender-service` (8188) | Revisar qué hace report antes de construir nada |
-| Notificaciones al proveedor | `sender-service` | Dos mails: orden aprobada y pago ejecutado |
+| Notificaciones al proveedor | `sender-service` | Dos mails: aprobación y pago ejecutado |
 
 No están numeradas a propósito. Cuando alguna se vuelva trabajo real, se le abre carpeta y
 entra al roadmap.
@@ -130,14 +97,7 @@ entra al roadmap.
 
 ## Falta definir
 
-Sólo lo que frena los dos features de arriba.
-
-| # | Qué | Frena |
-|---|---|---|
-| **B5** | El *"y/o"* del nivel 2: ¿aprueba uno solo o hacen falta los dos? | Feature 3 |
-
-Lo que se puede mirar sin preguntarle a nadie, y conviene hacer antes de diseñar los
-endpoints del feature 2:
+Lo que se puede mirar sin preguntarle a nadie:
 
 - Qué API consume el `tesoreria-compras-client` que ya existe (puerto 4201). O ya le habla
   a core, o espera un contrato, o es un stub.
@@ -146,11 +106,8 @@ endpoints del feature 2:
 
 | # | Resolución |
 |---|---|
-| B11 | Las órdenes usan `OC-AAAA-NNNNNN`: correlativo global que reinicia cada año y es generado por `compras-service`. Ejemplo: `OC-2026-000001`. |
-| B2 | Los cargos van como roles explícitos, no flags. Identidad por `google_mail` |
 | B3 | La ruta del gateway es integración posterior, no bloqueo |
-| B4 | El DBA crea las tablas (D9) |
-| B10 | Puerto 8203, verificado libre |
+| B10 | Puerto 8096 |
 
 ---
 

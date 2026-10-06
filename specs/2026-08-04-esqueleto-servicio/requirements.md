@@ -2,7 +2,7 @@
 
 **Feature 1** del [roadmap](../roadmap.md) · Abierto: 2026-08-04 · Estado: **cerrado**
 
-Global: [misión y reglas](../mission.md) · [stack y convenciones](../tech-stack.md)
+Global: [stack y convenciones](../tech-stack.md)
 
 ---
 
@@ -85,14 +85,13 @@ mantiene por Consul, sin URLs hardcodeadas.
 
 ## Fuera de alcance
 
-- Cualquier modelo de dominio de compras — eso es el feature 2.
+- Cualquier modelo de dominio de compras.
 - Persistencia y tablas: acá no se crea ninguna.
-- Autenticación de usuarios y aplicación de roles. El modelo de roles está decidido, pero
-  su integración corresponde al feature de aprobación. La llamada inicial a core no usa
+- Autenticación de usuarios y aplicación de roles. La llamada inicial a core no usa
   `X-API-Key`: el `ApiKeyFilter` es propio de umhub y core no tiene ese filtro.
 
 ## Bloqueos
 
 Ninguno. **B10 (el puerto) quedó resuelto**: verificado contra el `docker-compose.yml` del
-equipo, los puertos ocupados llegan hasta 8202 (guarani), así que **8203 está libre**. Se
-avisa al equipo, no hace falta esperar respuesta para arrancar.
+equipo, los puertos ocupados llegan hasta 8095 (haberes-report), así que **8096 está
+libre**. Se avisa al equipo, no hace falta esperar respuesta para arrancar.

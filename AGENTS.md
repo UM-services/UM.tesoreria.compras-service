@@ -5,7 +5,6 @@
 `compras-service` administra el circuito de compras de tesorería. La fuente de verdad
 para el alcance y las decisiones es `specs/`:
 
-- `specs/mission.md`: propósito, límites del dominio y decisiones globales.
 - `specs/tech-stack.md`: stack, arquitectura, convenciones y flujo de ramas.
 - `specs/roadmap.md`: orden de features, dependencias y bloqueos.
 - `specs/YYYY-MM-DD-nombre/`: requisitos, plan y validación de cada feature.

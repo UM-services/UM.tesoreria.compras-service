@@ -61,7 +61,7 @@
 - [x] 5.1 Levantar core + infra, después compras, y comprobar que **conviven** sin chocar
       nombres ni puertos
 - [x] 5.2 Ver los dos servicios en la UI de Consul
-- [x] 5.3 `GET localhost:8203/api/tesoreria/compras/ping/8` → proveedor real
+- [x] 5.3 `GET localhost:8096/api/tesoreria/compras/ping/8` → proveedor real
 - [x] 5.4 Correr [validation.md](validation.md) entero
 
 ## T6 — Documentación (D12, no opcional)
