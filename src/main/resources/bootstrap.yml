@@ -1,7 +1,8 @@
 app:
-  port: ${APP_PORT:8203}
+  port: ${APP_PORT:8096}
   name: ${APP_NAME:tesoreria-compras-service}
   logging: ${APP_LOGGING:info}
+  api-key: ${APP_API_KEY:default-secret-key}
   consul:
     host: ${APP_CONSUL_HOST:consul-service}
     port: ${APP_CONSUL_PORT:8500}
@@ -15,14 +16,6 @@ server:
 spring:
   application:
     name: ${app.name}
-  datasource:
-    url: ${APP_DB_URL:}
-    username: ${APP_DB_USERNAME:}
-    password: ${APP_DB_PASSWORD:}
-  jpa:
-    hibernate:
-      ddl-auto: none
-    open-in-view: false
   cloud:
     consul:
       host: ${app.consul.host}
