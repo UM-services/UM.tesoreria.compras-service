@@ -8,6 +8,16 @@ sincronizados: `VERSION` es lo que lee el flujo de release, `pom.xml` lo que lee
 
 ---
 
+## [0.3.1] - 2026-10-06
+
+### Cambiado
+
+- El artefacto Maven y el JAR pasan de `tesoreria-compras-service` a
+  `um.tesoreria.compras-service`: el `<finalName>` del `pom.xml` y el `COPY`/`ENTRYPOINT`
+  del `Dockerfile` quedan alineados con el nombre del repositorio, de la definición OpenAPI
+  y de SonarCloud.
+- La definición OpenAPI publica la versión del servicio (`0.3.1`).
+
 ## [0.3.0] - 2026-10-06
 
 Integración con el resto del ecosistema. El servicio queda con los slices de lectura
