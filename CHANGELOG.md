@@ -8,6 +8,33 @@ sincronizados: `VERSION` es lo que lee el flujo de release, `pom.xml` lo que lee
 
 ---
 
+## [0.4.0] - 2026-10-07
+
+### Agregado
+
+- Slice `pedidoCompra`: fachada del circuito "iniciar pedido de compra". Compone el contexto
+  (solicitante + dependencia desde `core-service`), el alta/edición del borrador, el envío
+  (que asigna `PC-AAAA-NNNNNN` en core) y la consulta. Endpoints canónicos
+  `/api/tesoreria/compras/pedido...`; identidad por header `X-User-Id`.
+- Verificación del permiso `compras.iniciar_pedido` contra el bundle efectivo de core
+  (`GET /api/tesoreria/core/permisoEfectivo/usuario/{userId}`); `403` si falta.
+
+### Cambiado
+
+- La definición OpenAPI publica la versión del servicio (`0.4.0`).
+
+---
+
+## [0.3.1] - 2026-10-06
+
+### Cambiado
+
+- El artefacto Maven y el JAR pasan de `tesoreria-compras-service` a
+  `um.tesoreria.compras-service`: el `<finalName>` del `pom.xml` y el `COPY`/`ENTRYPOINT`
+  del `Dockerfile` quedan alineados con el nombre del repositorio, de la definición OpenAPI
+  y de SonarCloud.
+- La definición OpenAPI publica la versión del servicio (`0.3.1`).
+
 ## [0.3.0] - 2026-10-06
 
 Integración con el resto del ecosistema. El servicio queda con los slices de lectura
