@@ -94,7 +94,7 @@
     </dependencyManagement>
 
     <build>
-        <finalName>tesoreria-compras-service</finalName>
+        <finalName>um.tesoreria.compras-service</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
