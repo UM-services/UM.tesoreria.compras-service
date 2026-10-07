@@ -6,27 +6,34 @@ graph TD
         B["ApiKeyFilter<br/>X-API-Key"]
         C["ArticuloController"]
         C2["ProveedorPingController"]
+        C3["PedidoCompraController"]
         D["DTOs + *DtoMapper"]
     end
 
     subgraph "Application"
         E["ArticuloService"]
         E2["ProveedorService"]
+        E3["PedidoCompraService"]
         F["GetArticuloByIdUseCaseImpl"]
         F2["SearchArticulosUseCaseImpl"]
         F3["GetProveedorByIdUseCaseImpl"]
+        F4["Casos de uso de pedidoCompra"]
     end
 
     subgraph "Domain (sin frameworks)"
         G["Modelo: Articulo, ArticuloSearch, Cuenta"]
         G2["Modelo: Proveedor, CuentaContable"]
+        G3["Modelo: PedidoCompra, PedidoCompraItem, Solicitante, DependenciaInfo, ContextoInicioPedido"]
         H["Ports In: *UseCase"]
-        I["Ports Out: ArticuloGateway, ProveedorGateway"]
+        I["Ports Out: ArticuloGateway, ProveedorGateway, CompraPedidoGateway, ContextoGateway, PermisoGateway"]
     end
 
     subgraph "Infrastructure: Client (Feign)"
         J["CoreArticuloFeignClientAdapter"]
         J2["CoreProveedorFeignClientAdapter"]
+        J3["CoreCompraPedidoFeignClientAdapter"]
+        J4["CoreContextoFeignClientAdapter"]
+        J5["CorePermisoFeignClientAdapter"]
         K["*Response (contratos de core)"]
     end
 
@@ -36,24 +43,42 @@ graph TD
     A -->|"header X-API-Key"| B
     B --> C
     B --> C2
+    B --> C3
     C --> D
     C2 --> D
+    C3 --> D
     C --> E
     C2 --> E2
+    C3 --> E3
     E --> F
     E --> F2
     E2 --> F3
+    E3 --> F4
     F -.-> H
     F2 -.-> H
     F3 -.-> H
+    F4 -.-> H
     E --> I
     E2 --> I
+    E3 --> I
     I -.-> J
     I -.-> J2
+    I -.-> J3
+    I -.-> J4
+    I -.-> J5
     J --> K
     J2 --> K
+    J3 --> K
+    J4 --> K
+    J5 --> K
     J -->|"resolver tesoreria-core-service"| L
     J2 -->|"resolver tesoreria-core-service"| L
+    J3 --> L
+    J4 --> L
+    J5 --> L
     J --> M
     J2 --> M
+    J3 --> M
+    J4 --> M
+    J5 --> M
 ```

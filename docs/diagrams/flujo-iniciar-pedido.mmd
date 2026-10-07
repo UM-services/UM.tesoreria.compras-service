@@ -1,0 +1,22 @@
+```mermaid
+sequenceDiagram
+    participant Cliente
+    participant Compras as compras-service
+    participant Consul
+    participant Core as core-service
+
+    Cliente->>Compras: GET /api/tesoreria/compras/pedido/iniciar (X-User-Id)
+    Compras->>Consul: resolver tesoreria-core-service
+    Consul-->>Compras: instancia de core
+    Compras->>Core: GET /api/tesoreria/core/permisoEfectivo/usuario/{userId}
+    Core-->>Compras: permisos efectivos
+    Compras->>Core: GET /api/tesoreria/core/auth/me/{userId}
+    Core-->>Compras: solicitante
+    Compras->>Core: GET /api/tesoreria/core/dependencia/{dependenciaId}
+    Core-->>Compras: dependencia (facultad y geografica)
+    Compras-->>Cliente: 200 ContextoInicioPedidoResponse
+    Cliente->>Compras: POST /api/tesoreria/compras/pedido (X-User-Id)
+    Compras->>Core: POST /api/tesoreria/core/compraPedido
+    Core-->>Compras: pedido creado (PC-AAAA-NNNNNN)
+    Compras-->>Cliente: 200 PedidoCompraResponse
+```
