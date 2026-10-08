@@ -38,10 +38,10 @@ class PedidoCompraExceptionHandlerTest {
 
     @Test
     void mapsNotFoundTo404() throws Exception {
-        when(pedidoCompraService.getById(1))
+        when(pedidoCompraService.getById(10L, 1))
                 .thenThrow(new PedidoCompraNotFoundException(1, new RuntimeException()));
 
-        mockMvc.perform(get("/api/tesoreria/compras/pedido/1"))
+        mockMvc.perform(get("/api/tesoreria/compras/pedido/1").header("X-User-Id", "10"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.detail").value("No se encontró el pedido de compra 1"));
     }
@@ -75,11 +75,19 @@ class PedidoCompraExceptionHandlerTest {
 
     @Test
     void mapsSourceUnavailableTo503() throws Exception {
-        when(pedidoCompraService.getById(1))
+        when(pedidoCompraService.getById(10L, 1))
                 .thenThrow(new PedidoCompraSourceUnavailableException(new RuntimeException()));
 
-        mockMvc.perform(get("/api/tesoreria/compras/pedido/1"))
+        mockMvc.perform(get("/api/tesoreria/compras/pedido/1").header("X-User-Id", "10"))
                 .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    void mapsAccesoPedidoDenegadoTo403() throws Exception {
+        when(pedidoCompraService.getById(10L, 1)).thenThrow(new AccesoPedidoDenegadoException(1));
+
+        mockMvc.perform(get("/api/tesoreria/compras/pedido/1").header("X-User-Id", "10"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -92,5 +100,16 @@ class PedidoCompraExceptionHandlerTest {
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                         .content("{\"necesidad\":\"prueba\",\"enviar\":false}"))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void mapsDependenciaNoAutorizadaTo403() throws Exception {
+        when(pedidoCompraService.aprobar(10L, 1))
+                .thenThrow(new DependenciaNoAutorizadaException(20));
+
+        mockMvc.perform(post("/api/tesoreria/compras/pedido/1/aprobar").header("X-User-Id", "10"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.detail").value(
+                        "No está autorizado a decidir sobre pedidos de la dependencia 20"));
     }
 }

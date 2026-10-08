@@ -8,6 +8,48 @@ sincronizados: `VERSION` es lo que lee el flujo de release, `pom.xml` lo que lee
 
 ---
 
+## [0.5.0] - 2026-10-08
+
+### Agregado
+
+- Slice `pedidoCompra`: circuito de decisión y consulta del pedido. Nuevos endpoints bajo
+  `/api/tesoreria/compras/pedido`:
+  - `GET /bandeja`: pedidos de las dependencias habilitadas del autorizante, con filtro
+    opcional por `estado`.
+  - `GET /consulta`: consulta global con filtros por `estado`, `solicitanteId`,
+    `dependenciaId` y rango `fechaDesde`/`fechaHasta`.
+  - `POST /{compraPedidoId}/aprobar`, `POST /{compraPedidoId}/rechazar` (con `motivo`) y
+    `POST /{compraPedidoId}/descartar` (con `motivo`).
+  - `GET /{compraPedidoId}/historial`: línea de tiempo de estados expuesta por core.
+- Permisos `compras.enviar_pedido` (bandeja y decisión del autorizante) y
+  `compras.consultar_pedidos` (consulta global), verificados contra el bundle efectivo de
+  core (`GET /api/tesoreria/core/permisoEfectivo/usuario/{userId}`); `403` si falta.
+- Acceso acotado por identidad: el autorizante sólo decide sobre pedidos de las
+  dependencias que tiene habilitadas (`GET /api/tesoreria/core/compraPedidoAutorizante/dependencias/{autorizanteId}`),
+  el solicitante sólo opera sobre sus propios pedidos, y la lectura se habilita por
+  permiso, por dependencia autorizada o por pertenencia.
+- Enriquecimiento de los listados con `dependenciaNombre` y `solicitanteNombre`, resueltos
+  contra core y degradando a `null` si la resolución falla, para no romper el listado.
+- Clientes Feign contra core: `POST /compraPedido/search`,
+  `POST /compraPedido/{id}/aprobar|rechazar|descartar`,
+  `GET /compraPedidoHistorial/{compraPedidoId}` y
+  `GET /compraPedidoAutorizante/dependencias/{autorizanteId}`.
+
+### Cambiado
+
+- `POST /{compraPedidoId}/enviar` (y `enviar=true` en alta/edición) propaga el `usuarioId`
+  a core y exige que el usuario sea el solicitante del pedido.
+- `GET /{compraPedidoId}` y `GET /{compraPedidoId}/historial` ahora exigen `X-User-Id` y
+  validan el acceso; responden `403` si el usuario no tiene permiso ni pertenencia.
+  **Rompe compatibilidad** con clientes que consultaban el pedido sin identidad.
+- `GET /api/tesoreria/compras/pedido` (listado por solicitante) ahora exige el permiso
+  `compras.iniciar_pedido`, además de la identidad.
+- `PedidoCompraResponse` expone `fechaEnvio`, `rechazoMotivo`, `descartadoMotivo`,
+  `dependenciaNombre` y `solicitanteNombre`.
+- La definición OpenAPI publica la versión del servicio (`0.5.0`).
+
+---
+
 ## [0.4.0] - 2026-10-07
 
 ### Agregado

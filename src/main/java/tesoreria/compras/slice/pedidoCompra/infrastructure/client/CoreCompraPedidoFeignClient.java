@@ -17,10 +17,26 @@ public interface CoreCompraPedidoFeignClient {
                                         @RequestBody PedidoCompra pedido);
 
     @PostMapping("/api/tesoreria/core/compraPedido/{compraPedidoId}/enviar")
-    CoreCompraPedidoResponse enviar(@PathVariable("compraPedidoId") Integer compraPedidoId);
+    CoreCompraPedidoResponse enviar(@PathVariable("compraPedidoId") Integer compraPedidoId,
+                                    @RequestParam("usuarioId") Integer usuarioId);
+
+    @PostMapping("/api/tesoreria/core/compraPedido/{compraPedidoId}/aprobar")
+    CoreCompraPedidoResponse aprobar(@PathVariable("compraPedidoId") Integer compraPedidoId,
+                                     @RequestBody CoreAprobarCompraPedidoRequest request);
+
+    @PostMapping("/api/tesoreria/core/compraPedido/{compraPedidoId}/rechazar")
+    CoreCompraPedidoResponse rechazar(@PathVariable("compraPedidoId") Integer compraPedidoId,
+                                      @RequestBody CoreRechazarCompraPedidoRequest request);
+
+    @PostMapping("/api/tesoreria/core/compraPedido/{compraPedidoId}/descartar")
+    CoreCompraPedidoResponse descartar(@PathVariable("compraPedidoId") Integer compraPedidoId,
+                                       @RequestBody CoreDescartarCompraPedidoRequest request);
 
     @GetMapping("/api/tesoreria/core/compraPedido/{compraPedidoId}")
     CoreCompraPedidoResponse getById(@PathVariable("compraPedidoId") Integer compraPedidoId);
+
+    @PostMapping("/api/tesoreria/core/compraPedido/search")
+    List<CoreCompraPedidoResponse> search(@RequestBody CoreCompraPedidoSearchRequest request);
 
     @GetMapping("/api/tesoreria/core/compraPedido")
     List<CoreCompraPedidoResponse> listarPorSolicitante(@RequestParam("solicitanteId") Long solicitanteId);

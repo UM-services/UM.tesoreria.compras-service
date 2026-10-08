@@ -6,10 +6,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tesoreria.compras.slice.pedidoCompra.PedidoCompraFixture;
+import tesoreria.compras.slice.pedidoCompra.domain.exception.AccesoPedidoDenegadoException;
+import tesoreria.compras.slice.pedidoCompra.domain.exception.DependenciaNoAutorizadaException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.IdentidadRequeridaException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PermisoDenegadoException;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
+import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.in.*;
+import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutorizanteGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.PermisoGateway;
 
 import java.util.List;
@@ -25,16 +29,28 @@ class PedidoCompraServiceTest {
     @Mock private CrearPedidoCompraUseCase crearPedidoCompraUseCase;
     @Mock private ActualizarPedidoCompraUseCase actualizarPedidoCompraUseCase;
     @Mock private EnviarPedidoCompraUseCase enviarPedidoCompraUseCase;
+    @Mock private AprobarPedidoCompraUseCase aprobarPedidoCompraUseCase;
+    @Mock private RechazarPedidoCompraUseCase rechazarPedidoCompraUseCase;
+    @Mock private DescartarPedidoCompraUseCase descartarPedidoCompraUseCase;
     @Mock private GetPedidoCompraUseCase getPedidoCompraUseCase;
     @Mock private ListPedidosCompraUseCase listPedidosCompraUseCase;
+    @Mock private ListBandejaEnvioUseCase listBandejaEnvioUseCase;
+    @Mock private ListConsultaPedidosUseCase listConsultaPedidosUseCase;
+    @Mock private GetHistorialPedidoCompraUseCase getHistorialPedidoCompraUseCase;
+    @Mock private EnriquecerPedidosUseCase enriquecerPedidosUseCase;
+    @Mock private AutorizanteGateway autorizanteGateway;
     @Mock private PermisoGateway permisoGateway;
 
     @InjectMocks
     private PedidoCompraService service;
 
+    private void conPermisos(String... claves) {
+        when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of(claves));
+    }
+
     @Test
     void getContextoConPermisoLoDevuelve() {
-        when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of("compras.iniciar_pedido"));
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
         when(getContextoInicioPedidoUseCase.getContexto(10L)).thenReturn(PedidoCompraFixture.contexto());
 
         assertThat(service.getContexto(10L).solicitante().userId()).isEqualTo(10L);
@@ -62,68 +78,185 @@ class PedidoCompraServiceTest {
 
     @Test
     void crearSinEnviarDevuelveElBorrador() {
-        when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of("compras.iniciar_pedido"));
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
         when(crearPedidoCompraUseCase.crear(10L, PedidoCompraFixture.pedidoSinIdentidad()))
                 .thenReturn(PedidoCompraFixture.pedido());
 
         PedidoCompra creado = service.crear(10L, PedidoCompraFixture.pedidoSinIdentidad(), false);
 
         assertThat(creado.compraPedidoId()).isEqualTo(1);
-        verify(enviarPedidoCompraUseCase, never()).enviar(anyInt());
+        verify(enviarPedidoCompraUseCase, never()).enviar(anyLong(), anyInt());
     }
 
     @Test
     void crearConEnviarDisparaElEnvio() {
-        when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of("compras.iniciar_pedido"));
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
         when(crearPedidoCompraUseCase.crear(10L, PedidoCompraFixture.pedidoSinIdentidad()))
                 .thenReturn(PedidoCompraFixture.pedido());
-        when(enviarPedidoCompraUseCase.enviar(1)).thenReturn(PedidoCompraFixture.pedido());
+        when(enviarPedidoCompraUseCase.enviar(10L, 1)).thenReturn(PedidoCompraFixture.pedido());
 
         service.crear(10L, PedidoCompraFixture.pedidoSinIdentidad(), true);
 
-        verify(enviarPedidoCompraUseCase).enviar(1);
-    }
-
-    @Test
-    void actualizarSinEnviarDevuelveElActualizado() {
-        when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of("compras.iniciar_pedido"));
-        when(actualizarPedidoCompraUseCase.actualizar(1, PedidoCompraFixture.pedidoSinIdentidad()))
-                .thenReturn(PedidoCompraFixture.pedido());
-
-        service.actualizar(10L, 1, PedidoCompraFixture.pedidoSinIdentidad(), false);
-
-        verify(enviarPedidoCompraUseCase, never()).enviar(anyInt());
+        verify(enviarPedidoCompraUseCase).enviar(10L, 1);
     }
 
     @Test
     void actualizarConEnviarDisparaElEnvio() {
-        when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of("compras.iniciar_pedido"));
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedido());
         when(actualizarPedidoCompraUseCase.actualizar(1, PedidoCompraFixture.pedidoSinIdentidad()))
                 .thenReturn(PedidoCompraFixture.pedido());
-        when(enviarPedidoCompraUseCase.enviar(1)).thenReturn(PedidoCompraFixture.pedido());
+        when(enviarPedidoCompraUseCase.enviar(10L, 1)).thenReturn(PedidoCompraFixture.pedido());
 
         service.actualizar(10L, 1, PedidoCompraFixture.pedidoSinIdentidad(), true);
 
-        verify(enviarPedidoCompraUseCase).enviar(1);
+        verify(enviarPedidoCompraUseCase).enviar(10L, 1);
+    }
+
+    @Test
+    void actualizarUnPedidoAjenoLanzaAccesoDenegado() {
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoAjeno());
+
+        assertThatThrownBy(() -> service.actualizar(10L, 1, PedidoCompraFixture.pedidoSinIdentidad(), false))
+                .isInstanceOf(AccesoPedidoDenegadoException.class);
     }
 
     @Test
     void enviarDelegaEnElCasoDeUso() {
-        when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of("compras.iniciar_pedido"));
-        when(enviarPedidoCompraUseCase.enviar(1)).thenReturn(PedidoCompraFixture.pedido());
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedido());
+        when(enviarPedidoCompraUseCase.enviar(10L, 1)).thenReturn(PedidoCompraFixture.pedido());
 
         assertThat(service.enviar(10L, 1).numero()).isEqualTo("PC-2026-000001");
     }
 
     @Test
-    void getByIdDelegaEnElCasoDeUso() {
+    void enviarUnPedidoAjenoLanzaAccesoDenegado() {
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoAjeno());
+
+        assertThatThrownBy(() -> service.enviar(10L, 1)).isInstanceOf(AccesoPedidoDenegadoException.class);
+    }
+
+    @Test
+    void descartarDelegaEnElCasoDeUso() {
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedido());
+        when(descartarPedidoCompraUseCase.descartar(1, 10L, "No hace falta"))
+                .thenReturn(PedidoCompraFixture.pedido());
+
+        service.descartar(10L, 1, "No hace falta");
+
+        verify(descartarPedidoCompraUseCase).descartar(1, 10L, "No hace falta");
+    }
+
+    @Test
+    void aprobarConPermisoYDependenciaAutorizadaDelega() {
+        conPermisos(PedidoCompraService.PERMISO_ENVIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendienteEnvio());
+        when(autorizanteGateway.getDependenciasAutorizadas(10L)).thenReturn(List.of(20));
+        when(aprobarPedidoCompraUseCase.aprobar(1, 10L)).thenReturn(PedidoCompraFixture.pedido());
+
+        service.aprobar(10L, 1);
+
+        verify(aprobarPedidoCompraUseCase).aprobar(1, 10L);
+    }
+
+    @Test
+    void aprobarSinPermisoLanzaDenegado() {
+        when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of(PedidoCompraService.PERMISO_INICIAR_PEDIDO));
+
+        assertThatThrownBy(() -> service.aprobar(10L, 1)).isInstanceOf(PermisoDenegadoException.class);
+    }
+
+    @Test
+    void aprobarUnaDependenciaNoAutorizadaLanza() {
+        conPermisos(PedidoCompraService.PERMISO_ENVIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendienteEnvio());
+        when(autorizanteGateway.getDependenciasAutorizadas(10L)).thenReturn(List.of(99));
+
+        assertThatThrownBy(() -> service.aprobar(10L, 1)).isInstanceOf(DependenciaNoAutorizadaException.class);
+    }
+
+    @Test
+    void rechazarConPermisoYDependenciaAutorizadaDelega() {
+        conPermisos(PedidoCompraService.PERMISO_ENVIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendienteEnvio());
+        when(autorizanteGateway.getDependenciasAutorizadas(10L)).thenReturn(List.of(20));
+        when(rechazarPedidoCompraUseCase.rechazar(1, 10L, "Falta cotización"))
+                .thenReturn(PedidoCompraFixture.pedidoRechazado());
+
+        service.rechazar(10L, 1, "Falta cotización");
+
+        verify(rechazarPedidoCompraUseCase).rechazar(1, 10L, "Falta cotización");
+    }
+
+    @Test
+    void bandejaDelegaYEnriquece() {
+        conPermisos(PedidoCompraService.PERMISO_ENVIAR_PEDIDO);
+        when(listBandejaEnvioUseCase.listar(10L, "PENDIENTE_ENVIO"))
+                .thenReturn(List.of(PedidoCompraFixture.pedidoPendienteEnvio()));
+        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of(PedidoCompraFixture.resumen()));
+
+        assertThat(service.bandeja(10L, "PENDIENTE_ENVIO")).hasSize(1);
+    }
+
+    @Test
+    void consultaDelegaYEnriquece() {
+        conPermisos(PedidoCompraService.PERMISO_CONSULTAR_PEDIDOS);
+        PedidoCompraFiltro filtro = new PedidoCompraFiltro("ENVIADO", null, null, null, null, null);
+        when(listConsultaPedidosUseCase.listar(filtro)).thenReturn(List.of(PedidoCompraFixture.pedido()));
+        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of(PedidoCompraFixture.resumen()));
+
+        assertThat(service.consulta(10L, filtro)).hasSize(1);
+    }
+
+    @Test
+    void getByIdConConsultarDelega() {
+        conPermisos(PedidoCompraService.PERMISO_CONSULTAR_PEDIDOS);
         when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedido());
 
-        assertThat(service.getById(1).compraPedidoId()).isEqualTo(1);
+        assertThat(service.getById(10L, 1).compraPedidoId()).isEqualTo(1);
+    }
+
+    @Test
+    void getByIdDeUnPedidoAjenoSinConsultaNiDependenciaLanzaAccesoDenegado() {
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoAjeno());
+
+        assertThatThrownBy(() -> service.getById(10L, 1)).isInstanceOf(AccesoPedidoDenegadoException.class);
+    }
+
+    @Test
+    void getByIdPermitidoAlAutorizanteDeLaDependencia() {
+        conPermisos(PedidoCompraService.PERMISO_ENVIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendienteEnvio());
+        when(autorizanteGateway.getDependenciasAutorizadas(10L)).thenReturn(List.of(20));
+
+        assertThat(service.getById(10L, 1).compraPedidoId()).isEqualTo(1);
+    }
+
+    @Test
+    void historialConAlgunPermisoDelega() {
+        conPermisos(PedidoCompraService.PERMISO_CONSULTAR_PEDIDOS);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedido());
+        when(getHistorialPedidoCompraUseCase.listar(1)).thenReturn(List.of(PedidoCompraFixture.historial()));
+
+        assertThat(service.historial(10L, 1)).hasSize(1);
+    }
+
+    @Test
+    void historialSinAccesoLanzaDenegado() {
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoAjeno());
+
+        assertThatThrownBy(() -> service.historial(10L, 1)).isInstanceOf(AccesoPedidoDenegadoException.class);
     }
 
     @Test
     void listarDelegaEnElCasoDeUso() {
+        conPermisos(PedidoCompraService.PERMISO_INICIAR_PEDIDO);
         when(listPedidosCompraUseCase.listar(10L)).thenReturn(List.of(PedidoCompraFixture.pedido()));
 
         assertThat(service.listar(10L)).hasSize(1);

@@ -3,7 +3,9 @@ package tesoreria.compras.slice.pedidoCompra.infrastructure.web.mapper;
 import org.springframework.stereotype.Component;
 import tesoreria.compras.slice.pedidoCompra.domain.model.ContextoInicioPedido;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
+import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraHistorial;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraItem;
+import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraResumen;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.*;
 
 import java.util.List;
@@ -19,10 +21,22 @@ public class PedidoCompraDtoMapper {
                 null, null, null, null, null, null, null, null, null, null,
                 request.necesidad(), request.fechaRequerida(), request.urgente(), request.urgenciaMotivo(),
                 request.montoConocido(), request.montoEstimado(), request.fuenteEstimacion(),
+                null, null, null,
                 toDomainItems(request.items()));
     }
 
     public PedidoCompraResponse toResponse(PedidoCompra domain) {
+        return build(domain, null, null);
+    }
+
+    public PedidoCompraResponse toResponse(PedidoCompraResumen resumen) {
+        if (resumen == null) {
+            return null;
+        }
+        return build(resumen.pedido(), resumen.dependenciaNombre(), resumen.solicitanteNombre());
+    }
+
+    private PedidoCompraResponse build(PedidoCompra domain, String dependenciaNombre, String solicitanteNombre) {
         if (domain == null) {
             return null;
         }
@@ -31,7 +45,20 @@ public class PedidoCompraDtoMapper {
                 domain.autorizanteId(), domain.solicitanteId(), domain.dependenciaId(), domain.facultadId(),
                 domain.geograficaId(), domain.necesidad(), domain.fechaRequerida(), domain.urgente(),
                 domain.urgenciaMotivo(), domain.montoConocido(), domain.montoEstimado(),
-                domain.fuenteEstimacion(), toResponseItems(domain.items()));
+                domain.fuenteEstimacion(), domain.fechaEnvio(), domain.rechazoMotivo(), domain.descartadoMotivo(),
+                dependenciaNombre, solicitanteNombre,
+                toResponseItems(domain.items()));
+    }
+
+    public List<PedidoCompraHistorialResponse> toResponseHistorial(List<PedidoCompraHistorial> historial) {
+        if (historial == null) {
+            return List.of();
+        }
+        return historial.stream()
+                .map(entry -> new PedidoCompraHistorialResponse(
+                        entry.compraPedidoHistorialId(), entry.compraPedidoId(), entry.estado(),
+                        entry.usuarioId(), entry.observacion(), entry.fecha()))
+                .toList();
     }
 
     public ContextoInicioPedidoResponse toResponse(ContextoInicioPedido contexto) {

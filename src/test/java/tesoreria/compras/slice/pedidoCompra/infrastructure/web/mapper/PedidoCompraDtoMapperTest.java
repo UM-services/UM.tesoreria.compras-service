@@ -54,6 +54,39 @@ class PedidoCompraDtoMapperTest {
     }
 
     @Test
+    void domainToResponseCopiaLosCamposDeDecision() {
+        var response = mapper.toResponse(PedidoCompraFixture.pedidoRechazado());
+
+        assertThat(response.estado()).isEqualTo("RECHAZADO");
+        assertThat(response.rechazoMotivo()).isEqualTo("Falta cotización");
+        assertThat(response.dependenciaNombre()).isNull();
+        assertThat(response.solicitanteNombre()).isNull();
+    }
+
+    @Test
+    void resumenToResponseIncluyeLosNombres() {
+        var response = mapper.toResponse(PedidoCompraFixture.resumen());
+
+        assertThat(response.compraPedidoId()).isEqualTo(1);
+        assertThat(response.dependenciaNombre()).isEqualTo("Dirección General de Administración");
+        assertThat(response.solicitanteNombre()).isEqualTo("Usuario Demo");
+    }
+
+    @Test
+    void historialToResponse() {
+        var responses = mapper.toResponseHistorial(List.of(PedidoCompraFixture.historial()));
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).estado()).isEqualTo("ENVIADO");
+        assertThat(responses.get(0).compraPedidoId()).isEqualTo(1);
+    }
+
+    @Test
+    void nullHistorialDevuelveListaVacia() {
+        assertThat(mapper.toResponseHistorial(null)).isEmpty();
+    }
+
+    @Test
     void nullDomainDevuelveNull() {
         assertThat(mapper.toResponse((tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra) null)).isNull();
     }

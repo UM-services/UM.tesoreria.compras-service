@@ -20,12 +20,44 @@ public final class PedidoCompraFixture {
     public static PedidoCompra pedido() {
         return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0), "BORRADOR",
                 null, 10, 20, 30, 40, "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
-                false, null, true, new BigDecimal("4500000.00"), null, List.of(item()));
+                false, null, true, new BigDecimal("4500000.00"), null,
+                null, null, null, List.of(item()));
+    }
+
+    public static PedidoCompra pedidoPendienteEnvio() {
+        return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0), "PENDIENTE_ENVIO",
+                null, 10, 20, 30, 40, "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
+                false, null, true, new BigDecimal("4500000.00"), null,
+                null, null, null, List.of(item()));
+    }
+
+    public static PedidoCompra pedidoRechazado() {
+        return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0), "RECHAZADO",
+                10, 10, 20, 30, 40, "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
+                false, null, true, new BigDecimal("4500000.00"), null,
+                null, "Falta cotización", null, List.of(item()));
+    }
+
+    public static PedidoCompra pedidoAjeno() {
+        return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0), "PENDIENTE_ENVIO",
+                99, 99, 20, 30, 40, "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
+                false, null, true, new BigDecimal("4500000.00"), null,
+                null, null, null, List.of(item()));
+    }
+
+    public static PedidoCompraResumen resumen() {
+        return new PedidoCompraResumen(pedidoPendienteEnvio(),
+                "Dirección General de Administración", "Usuario Demo");
     }
 
     public static PedidoCompra pedidoSinIdentidad() {
         return new PedidoCompra(null, null, null, null, null, null, null, null, null, null,
-                "Renovación de equipamiento", null, false, null, true, null, null, List.of(item()));
+                "Renovación de equipamiento", null, false, null, true, null, null,
+                null, null, null, List.of(item()));
+    }
+
+    public static PedidoCompraHistorial historial() {
+        return new PedidoCompraHistorial(1L, 1, "ENVIADO", 10, null, LocalDateTime.of(2026, 10, 8, 12, 0));
     }
 
     public static Solicitante solicitante() {
@@ -49,7 +81,16 @@ public final class PedidoCompraFixture {
         return new CoreCompraPedidoResponse(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0),
                 "BORRADOR", null, 10, 20, 30, 40, "Renovación de equipamiento",
                 LocalDateTime.of(2026, 10, 15, 0, 0), false, null, true, new BigDecimal("4500000.00"),
-                null, List.of(coreItemResponse()));
+                null, null, null, null, List.of(coreItemResponse()));
+    }
+
+    public static CoreCompraPedidoAutorizanteResponse coreAutorizanteResponse(List<Integer> dependenciaIds) {
+        return new CoreCompraPedidoAutorizanteResponse(10, dependenciaIds);
+    }
+
+    public static CoreCompraPedidoHistorialResponse coreHistorialResponse() {
+        return new CoreCompraPedidoHistorialResponse(1L, 1, "ENVIADO", 10, null,
+                LocalDateTime.of(2026, 10, 8, 12, 0));
     }
 
     public static CoreUsuarioResponse coreUsuarioResponse() {
