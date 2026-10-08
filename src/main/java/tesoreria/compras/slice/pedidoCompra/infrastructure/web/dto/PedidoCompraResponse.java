@@ -22,6 +22,11 @@ public record PedidoCompraResponse(
         Boolean montoConocido,
         BigDecimal montoEstimado,
         String fuenteEstimacion,
+        LocalDateTime fechaEnvio,
+        String rechazoMotivo,
+        String descartadoMotivo,
+        String dependenciaNombre,
+        String solicitanteNombre,
         List<PedidoCompraItemResponse> items
 ) {
 }

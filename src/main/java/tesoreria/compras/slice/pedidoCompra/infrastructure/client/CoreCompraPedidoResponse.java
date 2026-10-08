@@ -21,6 +21,9 @@ public record CoreCompraPedidoResponse(
         Boolean montoConocido,
         java.math.BigDecimal montoEstimado,
         String fuenteEstimacion,
+        java.time.LocalDateTime fechaEnvio,
+        String rechazoMotivo,
+        String descartadoMotivo,
         java.util.List<CoreCompraPedidoItemResponse> items
 ) {
 }
