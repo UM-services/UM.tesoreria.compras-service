@@ -23,9 +23,9 @@ graph TD
     subgraph "Domain (sin frameworks)"
         G["Modelo: Articulo, ArticuloSearch, Cuenta"]
         G2["Modelo: Proveedor, CuentaContable"]
-        G3["Modelo: PedidoCompra, PedidoCompraItem, Solicitante, DependenciaInfo, ContextoInicioPedido"]
+        G3["Modelo: PedidoCompra, PedidoCompraItem, PedidoCompraResumen, PedidoCompraHistorial, PedidoCompraFiltro, Solicitante, DependenciaInfo, ContextoInicioPedido"]
         H["Ports In: *UseCase"]
-        I["Ports Out: ArticuloGateway, ProveedorGateway, CompraPedidoGateway, ContextoGateway, PermisoGateway"]
+        I["Ports Out: ArticuloGateway, ProveedorGateway, CompraPedidoGateway, ContextoGateway, PermisoGateway, AutorizanteGateway, HistorialGateway"]
     end
 
     subgraph "Infrastructure: Client (Feign)"
@@ -34,6 +34,8 @@ graph TD
         J3["CoreCompraPedidoFeignClientAdapter"]
         J4["CoreContextoFeignClientAdapter"]
         J5["CorePermisoFeignClientAdapter"]
+        J6["CoreCompraPedidoAutorizanteFeignClientAdapter"]
+        J7["CoreCompraPedidoHistorialFeignClientAdapter"]
         K["*Response (contratos de core)"]
     end
 
@@ -66,19 +68,27 @@ graph TD
     I -.-> J3
     I -.-> J4
     I -.-> J5
+    I -.-> J6
+    I -.-> J7
     J --> K
     J2 --> K
     J3 --> K
     J4 --> K
     J5 --> K
+    J6 --> K
+    J7 --> K
     J -->|"resolver tesoreria-core-service"| L
     J2 -->|"resolver tesoreria-core-service"| L
     J3 --> L
     J4 --> L
     J5 --> L
+    J6 --> L
+    J7 --> L
     J --> M
     J2 --> M
     J3 --> M
     J4 --> M
     J5 --> M
+    J6 --> M
+    J7 --> M
 ```

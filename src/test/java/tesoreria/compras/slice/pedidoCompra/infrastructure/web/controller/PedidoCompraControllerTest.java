@@ -7,8 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tesoreria.compras.slice.pedidoCompra.PedidoCompraFixture;
 import tesoreria.compras.slice.pedidoCompra.application.service.PedidoCompraService;
+import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
+import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.DescartarPedidoRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.PedidoCompraItemRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.PedidoCompraRequest;
+import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.RechazarPedidoRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.mapper.PedidoCompraDtoMapper;
 
 import java.math.BigDecimal;
@@ -80,10 +83,52 @@ class PedidoCompraControllerTest {
     }
 
     @Test
-    void findByIdDelega() {
-        when(pedidoCompraService.getById(1)).thenReturn(PedidoCompraFixture.pedido());
+    void descartarDelega() {
+        when(pedidoCompraService.descartar(10L, 1, "No hace falta")).thenReturn(PedidoCompraFixture.pedido());
 
-        assertThat(controller.findById(1).getBody().items()).hasSize(1);
+        controller.descartar(10L, 1, new DescartarPedidoRequest("No hace falta"));
+
+        verify(pedidoCompraService).descartar(10L, 1, "No hace falta");
+    }
+
+    @Test
+    void aprobarDelega() {
+        when(pedidoCompraService.aprobar(10L, 1)).thenReturn(PedidoCompraFixture.pedido());
+
+        assertThat(controller.aprobar(10L, 1).getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void rechazarDelega() {
+        when(pedidoCompraService.rechazar(10L, 1, "Falta cotización"))
+                .thenReturn(PedidoCompraFixture.pedidoRechazado());
+
+        controller.rechazar(10L, 1, new RechazarPedidoRequest("Falta cotización"));
+
+        verify(pedidoCompraService).rechazar(10L, 1, "Falta cotización");
+    }
+
+    @Test
+    void bandejaDelega() {
+        when(pedidoCompraService.bandeja(10L, "PENDIENTE_ENVIO"))
+                .thenReturn(List.of(PedidoCompraFixture.resumen()));
+
+        assertThat(controller.bandeja(10L, "PENDIENTE_ENVIO").getBody()).hasSize(1);
+    }
+
+    @Test
+    void consultaDelega() {
+        when(pedidoCompraService.consulta(eq(10L), any(PedidoCompraFiltro.class)))
+                .thenReturn(List.of(PedidoCompraFixture.resumen()));
+
+        assertThat(controller.consulta(10L, "ENVIADO", null, null, null, null).getBody()).hasSize(1);
+    }
+
+    @Test
+    void findByIdDelega() {
+        when(pedidoCompraService.getById(10L, 1)).thenReturn(PedidoCompraFixture.pedido());
+
+        assertThat(controller.findById(10L, 1).getBody().items()).hasSize(1);
     }
 
     @Test
@@ -91,6 +136,13 @@ class PedidoCompraControllerTest {
         when(pedidoCompraService.listar(10L)).thenReturn(List.of(PedidoCompraFixture.pedido()));
 
         assertThat(controller.listar(10L).getBody()).hasSize(1);
+    }
+
+    @Test
+    void historialDelega() {
+        when(pedidoCompraService.historial(10L, 1)).thenReturn(List.of(PedidoCompraFixture.historial()));
+
+        assertThat(controller.historial(10L, 1).getBody()).hasSize(1);
     }
 
     private PedidoCompraRequest request(boolean enviar) {

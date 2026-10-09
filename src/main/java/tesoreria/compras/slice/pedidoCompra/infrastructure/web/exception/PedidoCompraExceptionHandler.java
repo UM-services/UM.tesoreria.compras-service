@@ -24,6 +24,16 @@ public class PedidoCompraExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
     }
 
+    @ExceptionHandler(DependenciaNoAutorizadaException.class)
+    ProblemDetail handleDependenciaNoAutorizada(DependenciaNoAutorizadaException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
+    }
+
+    @ExceptionHandler(AccesoPedidoDenegadoException.class)
+    ProblemDetail handleAccesoPedidoDenegado(AccesoPedidoDenegadoException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
+    }
+
     @ExceptionHandler(IdentidadRequeridaException.class)
     ProblemDetail handleIdentidad(IdentidadRequeridaException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());

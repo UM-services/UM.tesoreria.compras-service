@@ -2,7 +2,7 @@ package tesoreria.compras.slice.pedidoCompra.domain.ports.in;
 
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
 
-public interface EnviarPedidoCompraUseCase {
+public interface DescartarPedidoCompraUseCase {
 
-    PedidoCompra enviar(Long userId, Integer compraPedidoId);
+    PedidoCompra descartar(Integer compraPedidoId, Long usuarioId, String motivo);
 }
