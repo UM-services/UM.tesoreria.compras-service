@@ -12,6 +12,8 @@ import tesoreria.compras.slice.pedidoCompra.domain.exception.*;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.controller.PedidoCompraController;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.mapper.PedidoCompraDtoMapper;
 
+import java.math.BigDecimal;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -111,5 +113,18 @@ class PedidoCompraExceptionHandlerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.detail").value(
                         "No está autorizado a decidir sobre pedidos de la dependencia 20"));
+    }
+
+    @Test
+    void mapsLimiteExcedidoTo403ConCodigo() throws Exception {
+        when(pedidoCompraService.autorizarPresupuesto(10L, 1))
+                .thenThrow(new LimiteAutorizacionExcedidoException(1,
+                        new BigDecimal("5000000.00"), new BigDecimal("4500000.00")));
+
+        mockMvc.perform(post("/api/tesoreria/compras/pedido/1/autorizar-presupuesto")
+                        .header("X-User-Id", "10"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("LIMITE_AUTORIZACION_EXCEDIDO"))
+                .andExpect(jsonPath("$.monto").value(5000000.00));
     }
 }

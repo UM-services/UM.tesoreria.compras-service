@@ -3,6 +3,10 @@ app:
   name: ${APP_NAME:tesoreria-compras-service}
   logging: ${APP_LOGGING:info}
   api-key: ${APP_API_KEY:default-secret-key}
+  permissions:
+    # PEP de la fachada (@RequierePermiso): activo por defecto; apagarlo revierte al
+    # comportamiento anterior sin desplegar código. Sólo afecta endpoints anotados.
+    enforce: ${APP_PERMISSIONS_ENFORCE:true}
   consul:
     host: ${APP_CONSUL_HOST:consul-service}
     port: ${APP_CONSUL_PORT:8500}

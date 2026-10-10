@@ -2,6 +2,7 @@ package tesoreria.compras.slice.pedidoCompra.application.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -9,13 +10,17 @@ import tesoreria.compras.slice.pedidoCompra.PedidoCompraFixture;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.AccesoPedidoDenegadoException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.DependenciaNoAutorizadaException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.IdentidadRequeridaException;
+import tesoreria.compras.slice.pedidoCompra.domain.exception.LimiteAutorizacionExcedidoException;
+import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraEstadoInvalidoException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PermisoDenegadoException;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.in.*;
+import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutoridadGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutorizanteGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.PermisoGateway;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,6 +45,10 @@ class PedidoCompraServiceTest {
     @Mock private EnriquecerPedidosUseCase enriquecerPedidosUseCase;
     @Mock private AutorizanteGateway autorizanteGateway;
     @Mock private PermisoGateway permisoGateway;
+    @Mock private EstimarPedidoCompraUseCase estimarPedidoCompraUseCase;
+    @Mock private AutorizarPresupuestoPedidoCompraUseCase autorizarPresupuestoPedidoCompraUseCase;
+    @Mock private RechazarPresupuestoPedidoCompraUseCase rechazarPresupuestoPedidoCompraUseCase;
+    @Mock private AutoridadGateway autoridadGateway;
 
     @InjectMocks
     private PedidoCompraService service;
@@ -265,5 +274,138 @@ class PedidoCompraServiceTest {
     @Test
     void listarSinIdentidadLanza() {
         assertThatThrownBy(() -> service.listar(null)).isInstanceOf(IdentidadRequeridaException.class);
+    }
+
+    @Test
+    void revisionConPermisoDelegaYEnriqueceConEstadoPorDefecto() {
+        conPermisos(PedidoCompraService.PERMISO_ESTIMAR);
+        when(listConsultaPedidosUseCase.listar(any())).thenReturn(List.of(PedidoCompraFixture.pedido()));
+        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of(PedidoCompraFixture.resumen()));
+
+        assertThat(service.revision(10L, null)).hasSize(1);
+
+        ArgumentCaptor<PedidoCompraFiltro> captor = ArgumentCaptor.forClass(PedidoCompraFiltro.class);
+        verify(listConsultaPedidosUseCase).listar(captor.capture());
+        assertThat(captor.getValue().estado()).isEqualTo("EN_REVISION_COMPRAS");
+    }
+
+    @Test
+    void presupuestoBandejaListaLosPendientesDeAutorizar() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        when(listConsultaPedidosUseCase.listar(any())).thenReturn(List.of(PedidoCompraFixture.pedidoPendientePresupuesto()));
+        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of(PedidoCompraFixture.resumen()));
+
+        assertThat(service.presupuestoBandeja(10L)).hasSize(1);
+
+        ArgumentCaptor<PedidoCompraFiltro> captor = ArgumentCaptor.forClass(PedidoCompraFiltro.class);
+        verify(listConsultaPedidosUseCase).listar(captor.capture());
+        assertThat(captor.getValue().estado()).isEqualTo("PENDIENTE_AUTORIZACION_PRESUPUESTO");
+    }
+
+    @Test
+    void limiteDelegaEnElGatewayDeAutoridad() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        var limite = PedidoCompraFixture.limite(new BigDecimal("4500000.00"), false, true);
+        when(autoridadGateway.getLimite(10L, 7)).thenReturn(limite);
+
+        assertThat(service.limite(10L, 7)).isEqualTo(limite);
+    }
+
+    @Test
+    void estimarDelegaEnElCasoDeUso() {
+        conPermisos(PedidoCompraService.PERMISO_ESTIMAR);
+        when(estimarPedidoCompraUseCase.estimar(1, 10L, new BigDecimal("4500000.00"), "fuente"))
+                .thenReturn(PedidoCompraFixture.pedido());
+
+        service.estimar(10L, 1, new BigDecimal("4500000.00"), "fuente");
+
+        verify(estimarPedidoCompraUseCase).estimar(1, 10L, new BigDecimal("4500000.00"), "fuente");
+    }
+
+    @Test
+    void autorizarPresupuestoDenegadoSiElMontoSuperaElLimite() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+        when(autoridadGateway.getLimite(10L, 7))
+                .thenReturn(PedidoCompraFixture.limite(new BigDecimal("1500000.00"), false, true));
+
+        assertThatThrownBy(() -> service.autorizarPresupuesto(10L, 1))
+                .isInstanceOf(LimiteAutorizacionExcedidoException.class);
+    }
+
+    @Test
+    void autorizarPresupuestoDenegadoSiNoTieneAutoridad() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+        when(autoridadGateway.getLimite(10L, 7))
+                .thenReturn(PedidoCompraFixture.limite(BigDecimal.ZERO, false, false));
+
+        assertThatThrownBy(() -> service.autorizarPresupuesto(10L, 1))
+                .isInstanceOf(LimiteAutorizacionExcedidoException.class);
+    }
+
+    @Test
+    void autorizarPresupuestoDenegadoSiNoHayReferencia() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+        when(autoridadGateway.getLimite(10L, 7)).thenReturn(PedidoCompraFixture.limite(null, false, true));
+
+        assertThatThrownBy(() -> service.autorizarPresupuesto(10L, 1))
+                .isInstanceOf(LimiteAutorizacionExcedidoException.class);
+    }
+
+    @Test
+    void autorizarPresupuestoConLimiteSuficienteDelega() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+        when(autoridadGateway.getLimite(10L, 7))
+                .thenReturn(PedidoCompraFixture.limite(new BigDecimal("6000000.00"), false, true));
+        when(autorizarPresupuestoPedidoCompraUseCase.autorizar(1, 10L))
+                .thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+
+        service.autorizarPresupuesto(10L, 1);
+
+        verify(autorizarPresupuestoPedidoCompraUseCase).autorizar(1, 10L);
+    }
+
+    @Test
+    void autorizarPresupuestoIlimitadoDelega() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+        when(autoridadGateway.getLimite(10L, 7)).thenReturn(PedidoCompraFixture.limite(null, true, true));
+        when(autorizarPresupuestoPedidoCompraUseCase.autorizar(1, 10L))
+                .thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+
+        service.autorizarPresupuesto(10L, 1);
+
+        verify(autorizarPresupuestoPedidoCompraUseCase).autorizar(1, 10L);
+    }
+
+    @Test
+    void autorizarPresupuestoConEstadoInvalidoLanza() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedido());
+
+        assertThatThrownBy(() -> service.autorizarPresupuesto(10L, 1))
+                .isInstanceOf(PedidoCompraEstadoInvalidoException.class);
+    }
+
+    @Test
+    void rechazarPresupuestoDelegaEnElCasoDeUso() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        when(rechazarPresupuestoPedidoCompraUseCase.rechazar(1, 10L, "fuera de política"))
+                .thenReturn(PedidoCompraFixture.pedidoRechazado());
+
+        service.rechazarPresupuesto(10L, 1, "fuera de política");
+
+        verify(rechazarPresupuestoPedidoCompraUseCase).rechazar(1, 10L, "fuera de política");
+    }
+
+    @Test
+    void estimarSinPermisoLanzaDenegado() {
+        when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of("otro.permiso"));
+
+        assertThatThrownBy(() -> service.estimar(10L, 1, new BigDecimal("1"), null))
+                .isInstanceOf(PermisoDenegadoException.class);
     }
 }

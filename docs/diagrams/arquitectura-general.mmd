@@ -1,12 +1,17 @@
 ```mermaid
 graph TD
-    A["Cliente (API / Gateway)"]
+    A["Cliente (front / Gateway)"]
 
-    subgraph "Infrastructure: Web"
+    subgraph "Infrastructure: Web (fachada /api/tesoreria/compras)"
         B["ApiKeyFilter<br/>X-API-Key"]
+        PEP["RequierePermisoInterceptor<br/>@RequierePermiso"]
         C["ArticuloController"]
-        C2["ProveedorPingController"]
-        C3["PedidoCompraController"]
+        C2["ProveedorController"]
+        C3["ProveedorPingController"]
+        C4["PedidoCompraController"]
+        C5["UbicacionController"]
+        C6["UbicacionArticuloController"]
+        C7["SheetController"]
         D["DTOs + *DtoMapper"]
     end
 
@@ -14,81 +19,65 @@ graph TD
         E["ArticuloService"]
         E2["ProveedorService"]
         E3["PedidoCompraService"]
-        F["GetArticuloByIdUseCaseImpl"]
-        F2["SearchArticulosUseCaseImpl"]
-        F3["GetProveedorByIdUseCaseImpl"]
-        F4["Casos de uso de pedidoCompra"]
+        E4["UbicacionService"]
+        E5["UbicacionArticuloService"]
+        E6["SheetService"]
+        F["*UseCaseImpl (una por operación)"]
     end
 
     subgraph "Domain (sin frameworks)"
-        G["Modelo: Articulo, ArticuloSearch, Cuenta"]
-        G2["Modelo: Proveedor, CuentaContable"]
-        G3["Modelo: PedidoCompra, PedidoCompraItem, PedidoCompraResumen, PedidoCompraHistorial, PedidoCompraFiltro, Solicitante, DependenciaInfo, ContextoInicioPedido"]
+        G["Modelos: Articulo, Proveedor, PedidoCompra, Ubicacion, UbicacionArticulo"]
         H["Ports In: *UseCase"]
-        I["Ports Out: ArticuloGateway, ProveedorGateway, CompraPedidoGateway, ContextoGateway, PermisoGateway, AutorizanteGateway, HistorialGateway"]
+        I["Ports Out: ArticuloGateway, ProveedorGateway, CompraPedidoGateway, AutoridadGateway, AutorizanteGateway, ContextoGateway, PermisoGateway, HistorialGateway, UbicacionGateway, UbicacionArticuloGateway, SheetGateway"]
     end
 
     subgraph "Infrastructure: Client (Feign)"
-        J["CoreArticuloFeignClientAdapter"]
-        J2["CoreProveedorFeignClientAdapter"]
-        J3["CoreCompraPedidoFeignClientAdapter"]
-        J4["CoreContextoFeignClientAdapter"]
-        J5["CorePermisoFeignClientAdapter"]
-        J6["CoreCompraPedidoAutorizanteFeignClientAdapter"]
-        J7["CoreCompraPedidoHistorialFeignClientAdapter"]
-        K["*Response (contratos de core)"]
+        J["*FeignClientAdapter"]
+        K["Core*FeignClient + *Response (contratos de core)"]
     end
 
     L["Consul"]
     M["core-service:8092"]
 
     A -->|"header X-API-Key"| B
-    B --> C
-    B --> C2
-    B --> C3
+    B --> PEP
+    PEP -.->|"permiso efectivo"| J
+    PEP --> C
+    PEP --> C2
+    PEP --> C3
+    PEP --> C4
+    PEP --> C5
+    PEP --> C6
+    PEP --> C7
     C --> D
     C2 --> D
     C3 --> D
+    C4 --> D
+    C5 --> D
+    C6 --> D
+    C7 --> D
     C --> E
     C2 --> E2
-    C3 --> E3
+    C3 --> E2
+    C4 --> E3
+    C5 --> E4
+    C6 --> E5
+    C7 --> E6
     E --> F
-    E --> F2
-    E2 --> F3
-    E3 --> F4
+    E2 --> F
+    E3 --> F
+    E4 --> F
+    E5 --> F
+    E6 --> F
     F -.-> H
-    F2 -.-> H
-    F3 -.-> H
-    F4 -.-> H
     E --> I
     E2 --> I
     E3 --> I
+    E4 --> I
+    E5 --> I
+    E6 --> I
     I -.-> J
-    I -.-> J2
-    I -.-> J3
-    I -.-> J4
-    I -.-> J5
-    I -.-> J6
-    I -.-> J7
     J --> K
-    J2 --> K
-    J3 --> K
-    J4 --> K
-    J5 --> K
-    J6 --> K
-    J7 --> K
     J -->|"resolver tesoreria-core-service"| L
-    J2 -->|"resolver tesoreria-core-service"| L
-    J3 --> L
-    J4 --> L
-    J5 --> L
-    J6 --> L
-    J7 --> L
     J --> M
-    J2 --> M
-    J3 --> M
-    J4 --> M
-    J5 --> M
-    J6 --> M
-    J7 --> M
 ```

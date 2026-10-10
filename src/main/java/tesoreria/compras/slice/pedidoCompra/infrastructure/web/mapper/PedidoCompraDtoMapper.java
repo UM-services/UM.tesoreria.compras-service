@@ -2,6 +2,7 @@ package tesoreria.compras.slice.pedidoCompra.infrastructure.web.mapper;
 
 import org.springframework.stereotype.Component;
 import tesoreria.compras.slice.pedidoCompra.domain.model.ContextoInicioPedido;
+import tesoreria.compras.slice.pedidoCompra.domain.model.LimiteAutorizacion;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraHistorial;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraItem;
@@ -48,6 +49,14 @@ public class PedidoCompraDtoMapper {
                 domain.fuenteEstimacion(), domain.fechaEnvio(), domain.rechazoMotivo(), domain.descartadoMotivo(),
                 dependenciaNombre, solicitanteNombre,
                 toResponseItems(domain.items()));
+    }
+
+    public LimiteAutorizacionResponse toResponse(LimiteAutorizacion limite) {
+        if (limite == null) {
+            return null;
+        }
+        return new LimiteAutorizacionResponse(limite.usuarioId(), limite.ejercicioId(), limite.multiplico(),
+                limite.referencia(), limite.limite(), limite.ilimitado(), limite.tieneAutoridad());
     }
 
     public List<PedidoCompraHistorialResponse> toResponseHistorial(List<PedidoCompraHistorial> historial) {
