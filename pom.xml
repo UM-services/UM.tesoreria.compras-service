@@ -13,7 +13,7 @@
 
     <groupId>tesoreria</groupId>
     <artifactId>compras-service</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <name>UM Tesoreria Compras Service</name>
     <description>Servicio de compras de tesorería</description>
 

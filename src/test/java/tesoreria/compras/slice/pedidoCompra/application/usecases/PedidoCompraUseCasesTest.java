@@ -14,6 +14,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.ports.out.ContextoGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.HistorialGateway;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -233,5 +234,35 @@ class PedidoCompraUseCasesTest {
 
         assertThat(resumenes.get(0).dependenciaNombre()).isNull();
         assertThat(resumenes.get(0).solicitanteNombre()).isNull();
+    }
+
+    @Test
+    void estimarDelegaEnElGateway() {
+        when(compraPedidoGateway.estimar(1, 10L, new BigDecimal("4500000.00"), "fuente"))
+                .thenReturn(PedidoCompraFixture.pedido());
+
+        var useCase = new EstimarPedidoCompraUseCaseImpl(compraPedidoGateway);
+
+        assertThat(useCase.estimar(1, 10L, new BigDecimal("4500000.00"), "fuente").compraPedidoId()).isEqualTo(1);
+    }
+
+    @Test
+    void autorizarPresupuestoDelegaEnElGateway() {
+        when(compraPedidoGateway.autorizarPresupuesto(1, 10L))
+                .thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+
+        var useCase = new AutorizarPresupuestoPedidoCompraUseCaseImpl(compraPedidoGateway);
+
+        assertThat(useCase.autorizar(1, 10L).estado()).isEqualTo("PENDIENTE_AUTORIZACION_PRESUPUESTO");
+    }
+
+    @Test
+    void rechazarPresupuestoDelegaEnElGateway() {
+        when(compraPedidoGateway.rechazarPresupuesto(1, 10L, "motivo"))
+                .thenReturn(PedidoCompraFixture.pedidoRechazado());
+
+        var useCase = new RechazarPresupuestoPedidoCompraUseCaseImpl(compraPedidoGateway);
+
+        assertThat(useCase.rechazar(1, 10L, "motivo").estado()).isEqualTo("RECHAZADO");
     }
 }

@@ -115,4 +115,20 @@ class PedidoCompraDtoMapperTest {
     void nullContextoDevuelveNull() {
         assertThat(mapper.toResponse((tesoreria.compras.slice.pedidoCompra.domain.model.ContextoInicioPedido) null)).isNull();
     }
+
+    @Test
+    void limiteToResponse() {
+        var response = mapper.toResponse(PedidoCompraFixture.limite(new BigDecimal("4500000.00"), false, true));
+
+        assertThat(response.usuarioId()).isEqualTo(10L);
+        assertThat(response.multiplico()).isEqualTo(3);
+        assertThat(response.limite()).isEqualByComparingTo("4500000.00");
+        assertThat(response.tieneAutoridad()).isTrue();
+        assertThat(response.ilimitado()).isFalse();
+    }
+
+    @Test
+    void nullLimiteDevuelveNull() {
+        assertThat(mapper.toResponse((tesoreria.compras.slice.pedidoCompra.domain.model.LimiteAutorizacion) null)).isNull();
+    }
 }

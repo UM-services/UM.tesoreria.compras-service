@@ -8,6 +8,51 @@ sincronizados: `VERSION` es lo que lee el flujo de release, `pom.xml` lo que lee
 
 ---
 
+## [0.6.0] - 2026-10-10
+
+### Cambiado
+
+- refactor(compras): se eliminan los `@RequestParam` de la fachada y de los clientes Feign hacia core, alineados al cambio de contrato de core (path para requeridos, cuerpo de `POST` para opcionales/paginación): `POST /api/tesoreria/compras/articulo/tipo/{tipo}/page` (cuerpo `PageRequest`), `POST /api/tesoreria/compras/proveedor/page` (cuerpo `PageRequest`), `POST /api/tesoreria/compras/pedido/bandeja|consulta|revision` (cuerpo con los filtros) y `GET /api/tesoreria/compras/pedido/presupuesto/limite/{ejercicioId}`. Los Feign `CoreArticulo`, `CoreProveedor`, `CoreCompraPedido` (enviar/listar) y `CoreCompraAutoridad` (límite) se actualizan en lockstep; nuevo `tesoreria.compras.model.PageRequest`, `BandejaPedidoRequest`, `ConsultaPedidoRequest` y `CoreEnviarCompraPedidoRequest`.
+
+### Agregado
+
+- Etapa de **autorización previa por monto** del pedido de compra (fachada gateada sobre la
+  autoridad por monto resuelta en core):
+  - `POST /api/tesoreria/compras/pedido/revision` (permiso `compras.estimar`): bandeja de revisión
+    del dpto. de compras (por defecto `EN_REVISION_COMPRAS`).
+  - `POST /{id}/estimar` (`compras.estimar`): carga/confirma el valor estimado del pedido enviado.
+  - `GET /presupuesto/bandeja` y `GET /presupuesto/limite/{ejercicioId}` (`compras.presupuesto.autorizar`):
+    bandeja de la autoridad por monto y su límite efectivo (`multiplico × referencia`).
+  - `POST /{id}/autorizar-presupuesto` y `POST /{id}/rechazar-presupuesto` (`compras.presupuesto.autorizar`):
+    decisión de la autoridad. El autorizar es **fail-closed**: exige `montoEstimado ≤ límite`
+    (o perfil ilimitado); al excederse responde `403` `ProblemDetail` con
+    `codigo: LIMITE_AUTORIZACION_EXCEDIDO`, `monto` y `limite`.
+  - Puerto `AutoridadGateway` (Feign) → `GET /api/tesoreria/core/compraAutoridadUsuario/limite/{usuarioId}/{ejercicioId}`.
+- Fachada gateada de las pantallas **Gastos** y **Proveedores** bajo
+  `/api/tesoreria/compras/...`, que consume `core-service` por Feign para que el
+  `compras-client` no le pegue directo al core (que no puede llevar gating por el legacy).
+- PEP propio (`configuration/security`): anotación `@RequierePermiso`, interceptor que
+  evalúa la clave contra el bundle efectivo de core (`X-User-Id` transitorio) y responde
+  `403`/`401` como `ProblemDetail`. Activo por defecto (`APP_PERMISSIONS_ENFORCE=true`) y
+  acotado a endpoints anotados.
+- Slice `articulo`: `POST /tipo/{tipo}/page`, `GET /new`, `POST /`, `PUT /{id}` y
+  `DELETE /{id}` (más `GET /{id}` y `POST /search` ya existentes) con `compras.gastos*`.
+- Slice `proveedor`: `POST /page`, `POST /search`, `GET /cuit/{cuit}`, `GET /{id}`,
+  `POST /`, `PUT /{id}` y `DELETE /{id}` con `compras.proveedores*`.
+- Slices `ubicacion` (`GET /`) y `ubicacionArticulo` (`GET /articulo/{id}`,
+  `POST /`) con `compras.gastos`/`compras.gastos.imputar`.
+- Slice `sheet`: `GET /generateProveedores` con `compras.proveedores.descargar`.
+- `PaginatedResponse` propio que preserva el shape JSON de core.
+
+### Cambiado
+
+- El `compras-client` (`feature-gastos`, `feature-proveedores`) pasa a llamar a
+  `/api/tesoreria/compras/**`. Los buscadores compartidos siguen usando core.
+- El diagrama `docs/diagrams/arquitectura-general.mmd` se actualiza con los slices de la
+  fachada, el PEP y sus adapters Feign.
+- La definición OpenAPI publica la versión del servicio (`0.6.0`).
+
+
 ## [0.5.0] - 2026-10-08
 
 ### Agregado
