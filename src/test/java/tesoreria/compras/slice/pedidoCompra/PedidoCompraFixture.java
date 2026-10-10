@@ -45,6 +45,24 @@ public final class PedidoCompraFixture {
                 null, null, null, List.of(item()));
     }
 
+    public static PedidoCompra pedidoPendientePresupuesto() {
+        return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0),
+                "PENDIENTE_AUTORIZACION_PRESUPUESTO", 10, 10, 20, 30, 40,
+                "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
+                false, null, true, new BigDecimal("4500000.00"), "Estimación de compras",
+                LocalDateTime.of(2026, 10, 8, 12, 0), null, null, List.of(item()));
+    }
+
+    public static LimiteAutorizacion limite(BigDecimal limite, boolean ilimitado, boolean tieneAutoridad) {
+        return new LimiteAutorizacion(10L, 7, ilimitado ? null : 3, new BigDecimal("1500000.00"),
+                limite, ilimitado, tieneAutoridad);
+    }
+
+    public static CoreLimiteAutorizacionResponse coreLimiteResponse(BigDecimal limite) {
+        return new CoreLimiteAutorizacionResponse(10, 7, 3, new BigDecimal("1500000.00"), limite,
+                false, true);
+    }
+
     public static PedidoCompraResumen resumen() {
         return new PedidoCompraResumen(pedidoPendienteEnvio(),
                 "Dirección General de Administración", "Usuario Demo");

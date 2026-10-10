@@ -19,6 +19,7 @@ Cada feature abre su carpeta `specs/YYYY-MM-DD-nombre/` cuando se empieza a trab
 |---|---|---|
 | 0 | Entorno local | ✅ terminado |
 | 1 | [Esqueleto del servicio](2026-08-04-esqueleto-servicio/) | ✅ terminado |
+| 2 | [Fachada gateada de Gastos y Proveedores](2026-10-09-fachada-gastos-proveedores/) | 🚧 en curso |
 
 El plan de features se redefine con el nuevo alcance. Todo lo demás del circuito
 —facturas, imputación, pagos, notificaciones— vive en core o en otros servicios: ver

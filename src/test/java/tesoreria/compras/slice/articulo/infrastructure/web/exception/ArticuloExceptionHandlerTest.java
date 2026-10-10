@@ -8,10 +8,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tesoreria.compras.slice.articulo.application.service.ArticuloService;
+import tesoreria.compras.slice.articulo.domain.exception.ArticuloConflictException;
 import tesoreria.compras.slice.articulo.domain.exception.ArticuloNotFoundException;
 import tesoreria.compras.slice.articulo.domain.exception.ArticuloSourceUnavailableException;
+import tesoreria.compras.slice.articulo.domain.exception.ArticuloValidationException;
 import tesoreria.compras.slice.articulo.infrastructure.web.controller.ArticuloController;
-import tesoreria.compras.slice.articulo.infrastructure.web.exception.ArticuloExceptionHandler;
 import tesoreria.compras.slice.articulo.infrastructure.web.mapper.ArticuloDtoMapper;
 
 import static org.mockito.Mockito.when;
@@ -52,5 +53,23 @@ class ArticuloExceptionHandlerTest {
         mockMvc.perform(get("/api/tesoreria/compras/articulo/101"))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.detail").value("La fuente de artículos no está disponible"));
+    }
+
+    @Test
+    void mapsValidationErrorToBadRequest() throws Exception {
+        when(articuloService.getNewArticulo()).thenThrow(new ArticuloValidationException(new RuntimeException()));
+
+        mockMvc.perform(get("/api/tesoreria/compras/articulo/new"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("El artículo enviado no es válido."));
+    }
+
+    @Test
+    void mapsConflictToConflict() throws Exception {
+        when(articuloService.getNewArticulo()).thenThrow(new ArticuloConflictException(new RuntimeException()));
+
+        mockMvc.perform(get("/api/tesoreria/compras/articulo/new"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value("La operación sobre el artículo choca con otro dato."));
     }
 }

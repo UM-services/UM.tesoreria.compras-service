@@ -88,14 +88,14 @@ class CoreCompraPedidoFeignClientAdapterTest {
 
     @Test
     void mapsSendResponseToDomain() {
-        when(coreCompraPedidoFeignClient.enviar(1, 10)).thenReturn(PedidoCompraFixture.coreResponse());
+        when(coreCompraPedidoFeignClient.enviar(1, new CoreEnviarCompraPedidoRequest(10))).thenReturn(PedidoCompraFixture.coreResponse());
 
         assertThat(adapter.enviar(1, 10L).numero()).isEqualTo("PC-2026-000001");
     }
 
     @Test
     void mapsSendNotFound() {
-        when(coreCompraPedidoFeignClient.enviar(1, 10))
+        when(coreCompraPedidoFeignClient.enviar(1, new CoreEnviarCompraPedidoRequest(10)))
                 .thenThrow(new FeignException.NotFound("nf", request(), new byte[0], Map.of()));
 
         assertThatThrownBy(() -> adapter.enviar(1, 10L)).isInstanceOf(PedidoCompraNotFoundException.class);
@@ -103,7 +103,7 @@ class CoreCompraPedidoFeignClientAdapterTest {
 
     @Test
     void mapsSendConflict() {
-        when(coreCompraPedidoFeignClient.enviar(1, 10))
+        when(coreCompraPedidoFeignClient.enviar(1, new CoreEnviarCompraPedidoRequest(10)))
                 .thenThrow(new FeignException.Conflict("conflict", request(), new byte[0], Map.of()));
 
         assertThatThrownBy(() -> adapter.enviar(1, 10L)).isInstanceOf(PedidoCompraEstadoInvalidoException.class);
@@ -111,7 +111,7 @@ class CoreCompraPedidoFeignClientAdapterTest {
 
     @Test
     void mapsSendUnavailable() {
-        when(coreCompraPedidoFeignClient.enviar(1, 10))
+        when(coreCompraPedidoFeignClient.enviar(1, new CoreEnviarCompraPedidoRequest(10)))
                 .thenThrow(new FeignException.ServiceUnavailable("down", request(), new byte[0], Map.of()));
 
         assertThatThrownBy(() -> adapter.enviar(1, 10L)).isInstanceOf(PedidoCompraSourceUnavailableException.class);
@@ -169,7 +169,7 @@ class CoreCompraPedidoFeignClientAdapterTest {
 
     @Test
     void mapswithNullUsuarioId() {
-        when(coreCompraPedidoFeignClient.enviar(1, null)).thenReturn(PedidoCompraFixture.coreResponse());
+        when(coreCompraPedidoFeignClient.enviar(1, new CoreEnviarCompraPedidoRequest(null))).thenReturn(PedidoCompraFixture.coreResponse());
 
         assertThat(adapter.enviar(1, null).compraPedidoId()).isEqualTo(1);
     }
@@ -199,7 +199,8 @@ class CoreCompraPedidoFeignClientAdapterTest {
 
     @Test
     void listsBySolicitante() {
-        when(coreCompraPedidoFeignClient.listarPorSolicitante(10L)).thenReturn(List.of(PedidoCompraFixture.coreResponse()));
+        when(coreCompraPedidoFeignClient.listarPorSolicitante(
+                new CoreCompraPedidoSearchRequest(null, 10, null, null, null, null))).thenReturn(List.of(PedidoCompraFixture.coreResponse()));
 
         assertThat(adapter.listarPorSolicitante(10L)).hasSize(1);
     }
@@ -208,14 +209,16 @@ class CoreCompraPedidoFeignClientAdapterTest {
     void mapsListWithNullItems() {
         var response = new CoreCompraPedidoResponse(1, null, null, null, "BORRADOR", null, 10, 20, null, null,
                 null, null, null, null, null, null, null, null, null, null, null);
-        when(coreCompraPedidoFeignClient.listarPorSolicitante(10L)).thenReturn(List.of(response));
+        when(coreCompraPedidoFeignClient.listarPorSolicitante(
+                new CoreCompraPedidoSearchRequest(null, 10, null, null, null, null))).thenReturn(List.of(response));
 
         assertThat(adapter.listarPorSolicitante(10L).get(0).items()).isEmpty();
     }
 
     @Test
     void mapsListUnavailable() {
-        when(coreCompraPedidoFeignClient.listarPorSolicitante(10L))
+        when(coreCompraPedidoFeignClient.listarPorSolicitante(
+                new CoreCompraPedidoSearchRequest(null, 10, null, null, null, null)))
                 .thenThrow(new FeignException.ServiceUnavailable("down", request(), new byte[0], Map.of()));
 
         assertThatThrownBy(() -> adapter.listarPorSolicitante(10L))
@@ -240,6 +243,53 @@ class CoreCompraPedidoFeignClientAdapterTest {
                 .thenThrow(new FeignException.ServiceUnavailable("down", request(), new byte[0], Map.of()));
 
         assertThatThrownBy(() -> adapter.listar(filtro)).isInstanceOf(PedidoCompraSourceUnavailableException.class);
+    }
+
+    @Test
+    void mapsEstimarResponseToDomain() {
+        when(coreCompraPedidoFeignClient.estimar(1,
+                new CoreEstimarCompraPedidoRequest(new java.math.BigDecimal("4500000.00"), "fuente", 10)))
+                .thenReturn(PedidoCompraFixture.coreResponse());
+
+        assertThat(adapter.estimar(1, 10L, new java.math.BigDecimal("4500000.00"), "fuente").compraPedidoId()).isEqualTo(1);
+    }
+
+    @Test
+    void mapsEstimarConflict() {
+        when(coreCompraPedidoFeignClient.estimar(1,
+                new CoreEstimarCompraPedidoRequest(new java.math.BigDecimal("4500000.00"), "fuente", 10)))
+                .thenThrow(new FeignException.Conflict("conflict", request(), new byte[0], Map.of()));
+
+        assertThatThrownBy(() -> adapter.estimar(1, 10L, new java.math.BigDecimal("4500000.00"), "fuente"))
+                .isInstanceOf(PedidoCompraEstadoInvalidoException.class);
+    }
+
+    @Test
+    void mapsAutorizarPresupuestoResponseToDomain() {
+        when(coreCompraPedidoFeignClient.autorizarPresupuesto(1,
+                new CoreAutorizarPresupuestoCompraPedidoRequest(10)))
+                .thenReturn(PedidoCompraFixture.coreResponse());
+
+        assertThat(adapter.autorizarPresupuesto(1, 10L).compraPedidoId()).isEqualTo(1);
+    }
+
+    @Test
+    void mapsRechazarPresupuestoResponseToDomain() {
+        when(coreCompraPedidoFeignClient.rechazarPresupuesto(1,
+                new CoreRechazarPresupuestoCompraPedidoRequest(10, "motivo")))
+                .thenReturn(PedidoCompraFixture.coreResponse());
+
+        assertThat(adapter.rechazarPresupuesto(1, 10L, "motivo").compraPedidoId()).isEqualTo(1);
+    }
+
+    @Test
+    void mapsRechazarPresupuestoUnavailable() {
+        when(coreCompraPedidoFeignClient.rechazarPresupuesto(1,
+                new CoreRechazarPresupuestoCompraPedidoRequest(10, "motivo")))
+                .thenThrow(new FeignException.ServiceUnavailable("down", request(), new byte[0], Map.of()));
+
+        assertThatThrownBy(() -> adapter.rechazarPresupuesto(1, 10L, "motivo"))
+                .isInstanceOf(PedidoCompraSourceUnavailableException.class);
     }
 
     private Request request() {

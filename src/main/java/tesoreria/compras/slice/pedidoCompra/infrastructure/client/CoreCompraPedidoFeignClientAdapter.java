@@ -11,6 +11,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraItem;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.CompraPedidoGateway;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -44,7 +45,8 @@ public class CoreCompraPedidoFeignClientAdapter implements CompraPedidoGateway {
     @Override
     public PedidoCompra enviar(Integer compraPedidoId, Long usuarioId) {
         try {
-            return toDomain(coreCompraPedidoFeignClient.enviar(compraPedidoId, toInteger(usuarioId)));
+            return toDomain(coreCompraPedidoFeignClient.enviar(compraPedidoId,
+                    new CoreEnviarCompraPedidoRequest(toInteger(usuarioId))));
         } catch (FeignException.NotFound exception) {
             throw new PedidoCompraNotFoundException(compraPedidoId, exception);
         } catch (FeignException.Conflict exception) {
@@ -97,6 +99,48 @@ public class CoreCompraPedidoFeignClientAdapter implements CompraPedidoGateway {
     }
 
     @Override
+    public PedidoCompra estimar(Integer compraPedidoId, Long usuarioId, BigDecimal monto, String fuente) {
+        try {
+            return toDomain(coreCompraPedidoFeignClient.estimar(compraPedidoId,
+                    new CoreEstimarCompraPedidoRequest(monto, fuente, toInteger(usuarioId))));
+        } catch (FeignException.NotFound exception) {
+            throw new PedidoCompraNotFoundException(compraPedidoId, exception);
+        } catch (FeignException.Conflict exception) {
+            throw new PedidoCompraEstadoInvalidoException(compraPedidoId, exception);
+        } catch (FeignException exception) {
+            throw new PedidoCompraSourceUnavailableException(exception);
+        }
+    }
+
+    @Override
+    public PedidoCompra autorizarPresupuesto(Integer compraPedidoId, Long usuarioId) {
+        try {
+            return toDomain(coreCompraPedidoFeignClient.autorizarPresupuesto(compraPedidoId,
+                    new CoreAutorizarPresupuestoCompraPedidoRequest(toInteger(usuarioId))));
+        } catch (FeignException.NotFound exception) {
+            throw new PedidoCompraNotFoundException(compraPedidoId, exception);
+        } catch (FeignException.Conflict exception) {
+            throw new PedidoCompraEstadoInvalidoException(compraPedidoId, exception);
+        } catch (FeignException exception) {
+            throw new PedidoCompraSourceUnavailableException(exception);
+        }
+    }
+
+    @Override
+    public PedidoCompra rechazarPresupuesto(Integer compraPedidoId, Long usuarioId, String motivo) {
+        try {
+            return toDomain(coreCompraPedidoFeignClient.rechazarPresupuesto(compraPedidoId,
+                    new CoreRechazarPresupuestoCompraPedidoRequest(toInteger(usuarioId), motivo)));
+        } catch (FeignException.NotFound exception) {
+            throw new PedidoCompraNotFoundException(compraPedidoId, exception);
+        } catch (FeignException.Conflict exception) {
+            throw new PedidoCompraEstadoInvalidoException(compraPedidoId, exception);
+        } catch (FeignException exception) {
+            throw new PedidoCompraSourceUnavailableException(exception);
+        }
+    }
+
+    @Override
     public PedidoCompra getById(Integer compraPedidoId) {
         try {
             return toDomain(coreCompraPedidoFeignClient.getById(compraPedidoId));
@@ -110,7 +154,8 @@ public class CoreCompraPedidoFeignClientAdapter implements CompraPedidoGateway {
     @Override
     public List<PedidoCompra> listarPorSolicitante(Long solicitanteId) {
         try {
-            return coreCompraPedidoFeignClient.listarPorSolicitante(solicitanteId).stream()
+            return coreCompraPedidoFeignClient.listarPorSolicitante(
+                    new CoreCompraPedidoSearchRequest(null, toInteger(solicitanteId), null, null, null, null)).stream()
                     .map(this::toDomain)
                     .toList();
         } catch (FeignException exception) {

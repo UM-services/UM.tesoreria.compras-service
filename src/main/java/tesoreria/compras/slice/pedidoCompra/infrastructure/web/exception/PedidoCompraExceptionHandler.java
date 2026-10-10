@@ -29,6 +29,15 @@ public class PedidoCompraExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
     }
 
+    @ExceptionHandler(LimiteAutorizacionExcedidoException.class)
+    ProblemDetail handleLimiteExcedido(LimiteAutorizacionExcedidoException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
+        problem.setProperty("codigo", "LIMITE_AUTORIZACION_EXCEDIDO");
+        problem.setProperty("monto", exception.getMonto());
+        problem.setProperty("limite", exception.getLimite());
+        return problem;
+    }
+
     @ExceptionHandler(AccesoPedidoDenegadoException.class)
     ProblemDetail handleAccesoPedidoDenegado(AccesoPedidoDenegadoException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());

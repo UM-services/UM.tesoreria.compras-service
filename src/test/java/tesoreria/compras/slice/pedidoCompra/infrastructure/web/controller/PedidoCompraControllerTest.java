@@ -8,7 +8,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tesoreria.compras.slice.pedidoCompra.PedidoCompraFixture;
 import tesoreria.compras.slice.pedidoCompra.application.service.PedidoCompraService;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
+import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.BandejaPedidoRequest;
+import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.ConsultaPedidoRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.DescartarPedidoRequest;
+import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.EstimarPedidoRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.PedidoCompraItemRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.PedidoCompraRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.RechazarPedidoRequest;
@@ -113,7 +116,7 @@ class PedidoCompraControllerTest {
         when(pedidoCompraService.bandeja(10L, "PENDIENTE_ENVIO"))
                 .thenReturn(List.of(PedidoCompraFixture.resumen()));
 
-        assertThat(controller.bandeja(10L, "PENDIENTE_ENVIO").getBody()).hasSize(1);
+        assertThat(controller.bandeja(10L, new BandejaPedidoRequest("PENDIENTE_ENVIO")).getBody()).hasSize(1);
     }
 
     @Test
@@ -121,7 +124,7 @@ class PedidoCompraControllerTest {
         when(pedidoCompraService.consulta(eq(10L), any(PedidoCompraFiltro.class)))
                 .thenReturn(List.of(PedidoCompraFixture.resumen()));
 
-        assertThat(controller.consulta(10L, "ENVIADO", null, null, null, null).getBody()).hasSize(1);
+        assertThat(controller.consulta(10L, new ConsultaPedidoRequest("ENVIADO", null, null, null, null)).getBody()).hasSize(1);
     }
 
     @Test
@@ -143,6 +146,57 @@ class PedidoCompraControllerTest {
         when(pedidoCompraService.historial(10L, 1)).thenReturn(List.of(PedidoCompraFixture.historial()));
 
         assertThat(controller.historial(10L, 1).getBody()).hasSize(1);
+    }
+
+    @Test
+    void revisionDelega() {
+        when(pedidoCompraService.revision(10L, null)).thenReturn(List.of(PedidoCompraFixture.resumen()));
+
+        assertThat(controller.revision(10L, null).getBody()).hasSize(1);
+    }
+
+    @Test
+    void presupuestoBandejaDelega() {
+        when(pedidoCompraService.presupuestoBandeja(10L)).thenReturn(List.of(PedidoCompraFixture.resumen()));
+
+        assertThat(controller.presupuestoBandeja(10L).getBody()).hasSize(1);
+    }
+
+    @Test
+    void limiteDelega() {
+        when(pedidoCompraService.limite(10L, 7))
+                .thenReturn(PedidoCompraFixture.limite(new BigDecimal("4500000.00"), false, true));
+
+        assertThat(controller.limite(10L, 7).getBody().limite()).isEqualByComparingTo("4500000.00");
+    }
+
+    @Test
+    void estimarDelega() {
+        when(pedidoCompraService.estimar(10L, 1, new BigDecimal("4500000.00"), "fuente"))
+                .thenReturn(PedidoCompraFixture.pedido());
+
+        var response = controller.estimar(10L, 1, new EstimarPedidoRequest(new BigDecimal("4500000.00"), "fuente"));
+
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        verify(pedidoCompraService).estimar(10L, 1, new BigDecimal("4500000.00"), "fuente");
+    }
+
+    @Test
+    void autorizarPresupuestoDelega() {
+        when(pedidoCompraService.autorizarPresupuesto(10L, 1))
+                .thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+
+        assertThat(controller.autorizarPresupuesto(10L, 1).getStatusCode().value()).isEqualTo(200);
+    }
+
+    @Test
+    void rechazarPresupuestoDelega() {
+        when(pedidoCompraService.rechazarPresupuesto(10L, 1, "fuera de política"))
+                .thenReturn(PedidoCompraFixture.pedidoRechazado());
+
+        controller.rechazarPresupuesto(10L, 1, new RechazarPedidoRequest("fuera de política"));
+
+        verify(pedidoCompraService).rechazarPresupuesto(10L, 1, "fuera de política");
     }
 
     private PedidoCompraRequest request(boolean enviar) {

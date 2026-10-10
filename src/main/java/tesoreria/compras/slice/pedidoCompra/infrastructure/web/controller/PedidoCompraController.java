@@ -1,7 +1,6 @@
 package tesoreria.compras.slice.pedidoCompra.infrastructure.web.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tesoreria.compras.slice.pedidoCompra.application.service.PedidoCompraService;
@@ -10,7 +9,6 @@ import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.*;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.mapper.PedidoCompraDtoMapper;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -33,25 +31,27 @@ public class PedidoCompraController {
         return ResponseEntity.ok(pedidoCompraDtoMapper.toResponse(pedidoCompraService.getContexto(userId)));
     }
 
-    @GetMapping("/bandeja")
+    @PostMapping("/bandeja")
     public ResponseEntity<List<PedidoCompraResponse>> bandeja(
             @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
-            @RequestParam(required = false) String estado) {
+            @RequestBody(required = false) BandejaPedidoRequest request) {
+        String estado = request == null ? null : request.estado();
         return ResponseEntity.ok(pedidoCompraService.bandeja(userId, estado).stream()
                 .map(pedidoCompraDtoMapper::toResponse)
                 .toList());
     }
 
-    @GetMapping("/consulta")
+    @PostMapping("/consulta")
     public ResponseEntity<List<PedidoCompraResponse>> consulta(
             @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
-            @RequestParam(required = false) String estado,
-            @RequestParam(required = false) Integer solicitanteId,
-            @RequestParam(required = false) Integer dependenciaId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaDesde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaHasta) {
-        PedidoCompraFiltro filtro = new PedidoCompraFiltro(estado, solicitanteId, dependenciaId, null,
-                fechaDesde, fechaHasta);
+            @RequestBody(required = false) ConsultaPedidoRequest request) {
+        PedidoCompraFiltro filtro = new PedidoCompraFiltro(
+                request == null ? null : request.estado(),
+                request == null ? null : request.solicitanteId(),
+                request == null ? null : request.dependenciaId(),
+                null,
+                request == null ? null : request.fechaDesde(),
+                request == null ? null : request.fechaHasta());
         return ResponseEntity.ok(pedidoCompraService.consulta(userId, filtro).stream()
                 .map(pedidoCompraDtoMapper::toResponse)
                 .toList());
@@ -109,6 +109,61 @@ public class PedidoCompraController {
             @RequestBody RechazarPedidoRequest request) {
         return ResponseEntity.ok(pedidoCompraDtoMapper.toResponse(
                 pedidoCompraService.rechazar(userId, compraPedidoId,
+                        request == null ? null : request.motivo())));
+    }
+
+    @PostMapping("/revision")
+    public ResponseEntity<List<PedidoCompraResponse>> revision(
+            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
+            @RequestBody(required = false) BandejaPedidoRequest request) {
+        String estado = request == null ? null : request.estado();
+        return ResponseEntity.ok(pedidoCompraService.revision(userId, estado).stream()
+                .map(pedidoCompraDtoMapper::toResponse)
+                .toList());
+    }
+
+    @GetMapping("/presupuesto/bandeja")
+    public ResponseEntity<List<PedidoCompraResponse>> presupuestoBandeja(
+            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId) {
+        return ResponseEntity.ok(pedidoCompraService.presupuestoBandeja(userId).stream()
+                .map(pedidoCompraDtoMapper::toResponse)
+                .toList());
+    }
+
+    @GetMapping("/presupuesto/limite/{ejercicioId}")
+    public ResponseEntity<LimiteAutorizacionResponse> limite(
+            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
+            @PathVariable Integer ejercicioId) {
+        return ResponseEntity.ok(pedidoCompraDtoMapper.toResponse(
+                pedidoCompraService.limite(userId, ejercicioId)));
+    }
+
+    @PostMapping("/{compraPedidoId}/estimar")
+    public ResponseEntity<PedidoCompraResponse> estimar(
+            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
+            @PathVariable Integer compraPedidoId,
+            @RequestBody EstimarPedidoRequest request) {
+        return ResponseEntity.ok(pedidoCompraDtoMapper.toResponse(
+                pedidoCompraService.estimar(userId, compraPedidoId,
+                        request == null ? null : request.montoEstimado(),
+                        request == null ? null : request.fuenteEstimacion())));
+    }
+
+    @PostMapping("/{compraPedidoId}/autorizar-presupuesto")
+    public ResponseEntity<PedidoCompraResponse> autorizarPresupuesto(
+            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
+            @PathVariable Integer compraPedidoId) {
+        return ResponseEntity.ok(pedidoCompraDtoMapper.toResponse(
+                pedidoCompraService.autorizarPresupuesto(userId, compraPedidoId)));
+    }
+
+    @PostMapping("/{compraPedidoId}/rechazar-presupuesto")
+    public ResponseEntity<PedidoCompraResponse> rechazarPresupuesto(
+            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
+            @PathVariable Integer compraPedidoId,
+            @RequestBody RechazarPedidoRequest request) {
+        return ResponseEntity.ok(pedidoCompraDtoMapper.toResponse(
+                pedidoCompraService.rechazarPresupuesto(userId, compraPedidoId,
                         request == null ? null : request.motivo())));
     }
 
