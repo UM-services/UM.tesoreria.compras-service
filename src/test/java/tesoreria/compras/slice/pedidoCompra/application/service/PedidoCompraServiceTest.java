@@ -12,12 +12,14 @@ import tesoreria.compras.slice.pedidoCompra.domain.exception.DependenciaNoAutori
 import tesoreria.compras.slice.pedidoCompra.domain.exception.IdentidadRequeridaException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.LimiteAutorizacionExcedidoException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraEstadoInvalidoException;
+import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraSourceUnavailableException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PermisoDenegadoException;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.in.*;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutoridadGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutorizanteGateway;
+import tesoreria.compras.slice.pedidoCompra.domain.ports.out.EjercicioActualGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.PermisoGateway;
 
 import java.math.BigDecimal;
@@ -49,6 +51,7 @@ class PedidoCompraServiceTest {
     @Mock private AutorizarPresupuestoPedidoCompraUseCase autorizarPresupuestoPedidoCompraUseCase;
     @Mock private RechazarPresupuestoPedidoCompraUseCase rechazarPresupuestoPedidoCompraUseCase;
     @Mock private AutoridadGateway autoridadGateway;
+    @Mock private EjercicioActualGateway ejercicioActualGateway;
 
     @InjectMocks
     private PedidoCompraService service;
@@ -309,6 +312,25 @@ class PedidoCompraServiceTest {
         when(autoridadGateway.getLimite(10L, 7)).thenReturn(limite);
 
         assertThat(service.limite(10L, 7)).isEqualTo(limite);
+    }
+
+    @Test
+    void limiteActualResuelveElEjercicioEnCurso() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        var limite = PedidoCompraFixture.limite(new BigDecimal("300000.00"), false, true);
+        when(ejercicioActualGateway.getEjercicioActualId()).thenReturn(15);
+        when(autoridadGateway.getLimite(10L, 15)).thenReturn(limite);
+
+        assertThat(service.limiteActual(10L)).isEqualTo(limite);
+    }
+
+    @Test
+    void limiteActualSinEjercicioLanzaSourceUnavailable() {
+        conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
+        when(ejercicioActualGateway.getEjercicioActualId()).thenReturn(null);
+
+        assertThatThrownBy(() -> service.limiteActual(10L))
+                .isInstanceOf(PedidoCompraSourceUnavailableException.class);
     }
 
     @Test

@@ -7,6 +7,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.exception.DependenciaNoAutori
 import tesoreria.compras.slice.pedidoCompra.domain.exception.IdentidadRequeridaException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.LimiteAutorizacionExcedidoException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraEstadoInvalidoException;
+import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraSourceUnavailableException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PermisoDenegadoException;
 import tesoreria.compras.slice.pedidoCompra.domain.model.ContextoInicioPedido;
 import tesoreria.compras.slice.pedidoCompra.domain.model.LimiteAutorizacion;
@@ -17,6 +18,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraResumen;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.in.*;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutoridadGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutorizanteGateway;
+import tesoreria.compras.slice.pedidoCompra.domain.ports.out.EjercicioActualGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.PermisoGateway;
 
 import java.math.BigDecimal;
@@ -62,6 +64,7 @@ public class PedidoCompraService {
     private final AutorizarPresupuestoPedidoCompraUseCase autorizarPresupuestoPedidoCompraUseCase;
     private final RechazarPresupuestoPedidoCompraUseCase rechazarPresupuestoPedidoCompraUseCase;
     private final AutoridadGateway autoridadGateway;
+    private final EjercicioActualGateway ejercicioActualGateway;
 
     public ContextoInicioPedido getContexto(Long userId) {
         verificarPermiso(userId, PERMISO_INICIAR_PEDIDO);
@@ -125,6 +128,20 @@ public class PedidoCompraService {
 
     public LimiteAutorizacion limite(Long userId, Integer ejercicioId) {
         verificarPermiso(userId, PERMISO_PRESUPUESTO_AUTORIZAR);
+        return autoridadGateway.getLimite(userId, ejercicioId);
+    }
+
+    /**
+     * Límite efectivo del usuario para el <b>ejercicio en curso</b>, sin depender de que existan
+     * pedidos pendientes (la pantalla de autorización lo muestra siempre).
+     */
+    public LimiteAutorizacion limiteActual(Long userId) {
+        verificarPermiso(userId, PERMISO_PRESUPUESTO_AUTORIZAR);
+        Integer ejercicioId = ejercicioActualGateway.getEjercicioActualId();
+        if (ejercicioId == null) {
+            throw new PedidoCompraSourceUnavailableException(
+                    new IllegalStateException("No se pudo resolver el ejercicio actual"));
+        }
         return autoridadGateway.getLimite(userId, ejercicioId);
     }
 
