@@ -138,6 +138,13 @@ public class PedidoCompraController {
                 pedidoCompraService.limite(userId, ejercicioId)));
     }
 
+    @GetMapping("/presupuesto/limite")
+    public ResponseEntity<LimiteAutorizacionResponse> limiteActual(
+            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId) {
+        return ResponseEntity.ok(pedidoCompraDtoMapper.toResponse(
+                pedidoCompraService.limiteActual(userId)));
+    }
+
     @PostMapping("/{compraPedidoId}/estimar")
     public ResponseEntity<PedidoCompraResponse> estimar(
             @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
