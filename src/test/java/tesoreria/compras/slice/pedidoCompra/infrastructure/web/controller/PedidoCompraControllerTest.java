@@ -171,6 +171,14 @@ class PedidoCompraControllerTest {
     }
 
     @Test
+    void limiteActualDelega() {
+        when(pedidoCompraService.limiteActual(10L))
+                .thenReturn(PedidoCompraFixture.limite(new BigDecimal("300000.00"), false, true));
+
+        assertThat(controller.limiteActual(10L).getBody().limite()).isEqualByComparingTo("300000.00");
+    }
+
+    @Test
     void estimarDelega() {
         when(pedidoCompraService.estimar(10L, 1, new BigDecimal("4500000.00"), "fuente"))
                 .thenReturn(PedidoCompraFixture.pedido());

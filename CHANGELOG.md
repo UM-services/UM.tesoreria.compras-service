@@ -8,6 +8,16 @@ sincronizados: `VERSION` es lo que lee el flujo de release, `pom.xml` lo que lee
 
 ---
 
+## [0.7.0] - 2026-10-11
+
+### Agregado
+
+- feat(pedidoCompra): `GET /api/tesoreria/compras/pedido/presupuesto/limite` (sin ejercicio) resuelve el **ejercicio en curso** (Feign a core `GET /ejercicio/last`) y devuelve el límite efectivo del usuario; así la pantalla de autorización de presupuesto lo muestra aunque la bandeja esté vacía. Nuevo puerto `EjercicioActualGateway` + `CoreEjercicioFeignClient`/`CoreEjercicioFeignClientAdapter`.
+
+### Corregido
+
+- fix(pedidoCompra): el límite de autorización ya no depende de que existan pedidos pendientes; antes, con la bandeja vacía, no se consultaba y la UI mostraba "sin perfil" aunque el usuario sí tuviera autoridad.
+
 ## [0.6.0] - 2026-10-10
 
 ### Cambiado
