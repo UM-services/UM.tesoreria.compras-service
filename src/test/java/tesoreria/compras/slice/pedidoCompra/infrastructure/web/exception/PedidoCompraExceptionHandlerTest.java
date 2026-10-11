@@ -58,6 +58,16 @@ class PedidoCompraExceptionHandlerTest {
     }
 
     @Test
+    void mapsCotizacionesNoConfiguradasTo409ConCodigo() throws Exception {
+        when(pedidoCompraService.cotizacionesMinimas(10L, 1))
+                .thenThrow(new CotizacionesNoConfiguradasException());
+
+        mockMvc.perform(get("/api/tesoreria/compras/pedido/1/cotizaciones-minimas").header("X-User-Id", "10"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.codigo").value("COTIZACIONES_NO_CONFIGURADAS"));
+    }
+
+    @Test
     void mapsPermisoDenegadoTo403() throws Exception {
         when(pedidoCompraService.getContexto(10L))
                 .thenThrow(new PermisoDenegadoException("compras.iniciar_pedido"));

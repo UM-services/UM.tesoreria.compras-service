@@ -21,28 +21,28 @@ public final class PedidoCompraFixture {
         return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0), "BORRADOR",
                 null, 10, 20, 30, 40, "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
                 false, null, true, new BigDecimal("4500000.00"), null,
-                null, null, null, List.of(item()));
+                null, null, null, null, List.of(item()));
     }
 
     public static PedidoCompra pedidoPendienteEnvio() {
         return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0), "PENDIENTE_ENVIO",
                 null, 10, 20, 30, 40, "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
                 false, null, true, new BigDecimal("4500000.00"), null,
-                null, null, null, List.of(item()));
+                null, null, null, null, List.of(item()));
     }
 
     public static PedidoCompra pedidoRechazado() {
         return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0), "RECHAZADO",
                 10, 10, 20, 30, 40, "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
                 false, null, true, new BigDecimal("4500000.00"), null,
-                null, "Falta cotización", null, List.of(item()));
+                null, null, "Falta cotización", null, List.of(item()));
     }
 
     public static PedidoCompra pedidoAjeno() {
         return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0), "PENDIENTE_ENVIO",
                 99, 99, 20, 30, 40, "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
                 false, null, true, new BigDecimal("4500000.00"), null,
-                null, null, null, List.of(item()));
+                null, null, null, null, List.of(item()));
     }
 
     public static PedidoCompra pedidoPendientePresupuesto() {
@@ -50,7 +50,16 @@ public final class PedidoCompraFixture {
                 "PENDIENTE_AUTORIZACION_PRESUPUESTO", 10, 10, 20, 30, 40,
                 "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
                 false, null, true, new BigDecimal("4500000.00"), "Estimación de compras",
-                LocalDateTime.of(2026, 10, 8, 12, 0), null, null, List.of(item()));
+                null, LocalDateTime.of(2026, 10, 8, 12, 0), null, null, List.of(item()));
+    }
+
+    /** Pedido estimado con el snapshot del mínimo de cotizaciones ya cargado. */
+    public static PedidoCompra pedidoConMinimo(Integer cantidadMinima) {
+        return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0),
+                "PENDIENTE_AUTORIZACION_PRESUPUESTO", 10, 10, 20, 30, 40,
+                "Renovación de equipamiento", LocalDateTime.of(2026, 10, 15, 0, 0),
+                false, null, true, new BigDecimal("4500000.00"), "Estimación de compras",
+                cantidadMinima, null, null, null, List.of(item()));
     }
 
     public static LimiteAutorizacion limite(BigDecimal limite, boolean ilimitado, boolean tieneAutoridad) {
@@ -71,7 +80,7 @@ public final class PedidoCompraFixture {
     public static PedidoCompra pedidoSinIdentidad() {
         return new PedidoCompra(null, null, null, null, null, null, null, null, null, null,
                 "Renovación de equipamiento", null, false, null, true, null, null,
-                null, null, null, List.of(item()));
+                null, null, null, null, List.of(item()));
     }
 
     public static PedidoCompraHistorial historial() {
@@ -99,7 +108,7 @@ public final class PedidoCompraFixture {
         return new CoreCompraPedidoResponse(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0),
                 "BORRADOR", null, 10, 20, 30, 40, "Renovación de equipamiento",
                 LocalDateTime.of(2026, 10, 15, 0, 0), false, null, true, new BigDecimal("4500000.00"),
-                null, null, null, null, List.of(coreItemResponse()));
+                null, null, null, null, null, List.of(coreItemResponse()));
     }
 
     public static CoreCompraPedidoAutorizanteResponse coreAutorizanteResponse(List<Integer> dependenciaIds) {

@@ -207,6 +207,13 @@ class PedidoCompraControllerTest {
         verify(pedidoCompraService).rechazarPresupuesto(10L, 1, "fuera de política");
     }
 
+    @Test
+    void cotizacionesMinimasDelega() {
+        when(pedidoCompraService.cotizacionesMinimas(10L, 1)).thenReturn(2);
+
+        assertThat(controller.cotizacionesMinimas(10L, 1).getBody().cantidadMinima()).isEqualTo(2);
+    }
+
     private PedidoCompraRequest request(boolean enviar) {
         return new PedidoCompraRequest("Renovación", null, false, null, true,
                 new BigDecimal("4500000.00"), null,

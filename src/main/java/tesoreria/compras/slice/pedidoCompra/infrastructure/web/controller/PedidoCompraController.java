@@ -191,6 +191,14 @@ public class PedidoCompraController {
                 pedidoCompraService.getById(userId, compraPedidoId)));
     }
 
+    @GetMapping("/{compraPedidoId}/cotizaciones-minimas")
+    public ResponseEntity<CotizacionesMinimasResponse> cotizacionesMinimas(
+            @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
+            @PathVariable Integer compraPedidoId) {
+        return ResponseEntity.ok(new CotizacionesMinimasResponse(
+                compraPedidoId, pedidoCompraService.cotizacionesMinimas(userId, compraPedidoId)));
+    }
+
     @GetMapping("/{compraPedidoId}/historial")
     public ResponseEntity<List<PedidoCompraHistorialResponse>> historial(
             @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,

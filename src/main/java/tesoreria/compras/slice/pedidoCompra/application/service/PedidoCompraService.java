@@ -18,6 +18,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraResumen;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.in.*;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutoridadGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutorizanteGateway;
+import tesoreria.compras.slice.pedidoCompra.domain.ports.out.CotizacionGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.EjercicioActualGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.PermisoGateway;
 
@@ -65,6 +66,7 @@ public class PedidoCompraService {
     private final RechazarPresupuestoPedidoCompraUseCase rechazarPresupuestoPedidoCompraUseCase;
     private final AutoridadGateway autoridadGateway;
     private final EjercicioActualGateway ejercicioActualGateway;
+    private final CotizacionGateway cotizacionGateway;
 
     public ContextoInicioPedido getContexto(Long userId) {
         verificarPermiso(userId, PERMISO_INICIAR_PEDIDO);
@@ -148,6 +150,23 @@ public class PedidoCompraService {
     public PedidoCompra estimar(Long userId, Integer compraPedidoId, BigDecimal monto, String fuente) {
         verificarPermiso(userId, PERMISO_ESTIMAR);
         return estimarPedidoCompraUseCase.estimar(compraPedidoId, userId, monto, fuente);
+    }
+
+    /**
+     * Mínimo de cotizaciones del pedido: el snapshot ya cargado, o el cálculo con la configuración
+     * vigente (tramos × referencia). {@code null} si el pedido aún no tiene monto estimado. Lanza
+     * {@code COTIZACIONES_NO_CONFIGURADAS} (409) si la configuración no permite resolverlo.
+     */
+    public Integer cotizacionesMinimas(Long userId, Integer compraPedidoId) {
+        verificarPermiso(userId, PERMISO_ESTIMAR);
+        PedidoCompra pedido = getPedidoCompraUseCase.getById(compraPedidoId);
+        if (pedido.cantidadCotizacionesMinima() != null) {
+            return pedido.cantidadCotizacionesMinima();
+        }
+        if (pedido.montoEstimado() == null) {
+            return null;
+        }
+        return cotizacionGateway.resolverMinimo(pedido.ejercicioId(), pedido.montoEstimado());
     }
 
     /**

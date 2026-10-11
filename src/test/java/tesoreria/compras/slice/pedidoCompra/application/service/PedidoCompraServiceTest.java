@@ -19,6 +19,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.in.*;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutoridadGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutorizanteGateway;
+import tesoreria.compras.slice.pedidoCompra.domain.ports.out.CotizacionGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.EjercicioActualGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.PermisoGateway;
 
@@ -52,6 +53,7 @@ class PedidoCompraServiceTest {
     @Mock private RechazarPresupuestoPedidoCompraUseCase rechazarPresupuestoPedidoCompraUseCase;
     @Mock private AutoridadGateway autoridadGateway;
     @Mock private EjercicioActualGateway ejercicioActualGateway;
+    @Mock private CotizacionGateway cotizacionGateway;
 
     @InjectMocks
     private PedidoCompraService service;
@@ -342,6 +344,31 @@ class PedidoCompraServiceTest {
         service.estimar(10L, 1, new BigDecimal("4500000.00"), "fuente");
 
         verify(estimarPedidoCompraUseCase).estimar(1, 10L, new BigDecimal("4500000.00"), "fuente");
+    }
+
+    @Test
+    void cotizacionesMinimasUsaElSnapshot() {
+        conPermisos(PedidoCompraService.PERMISO_ESTIMAR);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoConMinimo(3));
+
+        assertThat(service.cotizacionesMinimas(10L, 1)).isEqualTo(3);
+    }
+
+    @Test
+    void cotizacionesMinimasCalculaSiNoHaySnapshot() {
+        conPermisos(PedidoCompraService.PERMISO_ESTIMAR);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedido());
+        when(cotizacionGateway.resolverMinimo(7, new BigDecimal("4500000.00"))).thenReturn(2);
+
+        assertThat(service.cotizacionesMinimas(10L, 1)).isEqualTo(2);
+    }
+
+    @Test
+    void cotizacionesMinimasSinMontoEstimadoDevuelveNull() {
+        conPermisos(PedidoCompraService.PERMISO_ESTIMAR);
+        when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoSinIdentidad());
+
+        assertThat(service.cotizacionesMinimas(10L, 1)).isNull();
     }
 
     @Test
