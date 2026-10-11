@@ -14,7 +14,7 @@ calidad del final. No alcanza con que compile.
 | V1 | El servicio levanta y responde | REQ-ESQ-07 | `curl localhost:<puerto>/actuator/health` → `UP` |
 | V2 | Aparece en Consul con el nombre exacto | REQ-ESQ-05 | `curl -s localhost:8500/v1/catalog/services` incluye **`tesoreria-compras-service`** |
 | V3 | Convive con el stack de core | REQ-ESQ-06 | Los dos compose levantados a la vez, sin choque de nombres ni puertos |
-| V4 | **Trae datos reales de core** | REQ-ESQ-08 | `GET /api/tesoreria/compras/ping/8` devuelve el proveedor 8, con razón social `Roberto Mario Cerutti` |
+| V4 | **Trae datos reales de core** | REQ-ESQ-08 | `GET /api/tesoreria/compras/ping/8` devuelve el proveedor 8 con los datos reales de core |
 | V5 | Sin URLs hardcodeadas | REQ-ESQ-09 | `grep -rn "localhost:8092\|http://tesoreria-core" src/` → vacío |
 | V6 | Ruta única canónica | D4 | El controller usa `@RequestMapping("/api/tesoreria/compras/...")`, sin forma dual `{...}` |
 | V7 | Swagger disponible | REQ-ESQ-11 | `/swagger-ui` responde |
@@ -87,7 +87,7 @@ enderezarla después.
 1. V1 a V11 pasan.
 2. Las puertas de calidad pasan.
 3. `REQ-ESQ-01..11` y `REQ-ESQ-12` están cubiertos.
-4. El puerto 8203 fue comunicado al equipo al incorporarlo al compose compartido.
+4. El puerto 8096 fue comunicado al equipo al incorporarlo al compose compartido.
 
 ## Integración (fuera del alcance del feature)
 

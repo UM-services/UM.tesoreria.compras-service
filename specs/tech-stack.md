@@ -13,8 +13,8 @@ no dos.
 | | Versión | Nota |
 |---|---|---|
 | Java | **25** | `<java.version>25</java.version>` |
-| Spring Boot | **4.1.0** | vía `spring-boot-starter-parent` |
-| Spring Cloud | **2025.1.2** | |
+| Spring Boot | **4.1.1** | vía `spring-boot-starter-parent` |
+| Spring Cloud | **2025.1.3** | |
 | Maven | 3.x | core no tiene wrapper; usa `maven:3-eclipse-temurin-25-alpine` en el build |
 | Lombok | 1.18.38 | `@RequiredArgsConstructor` + inyección por constructor es el estilo de la casa |
 | Kotlin | 2.4.10 | la propiedad está declarada, pero el código está **migrando activamente** de Kotlin a Java — escribir código nuevo en Java |
@@ -94,7 +94,7 @@ public class GetProveedorByIdUseCaseImpl implements GetProveedorByIdUseCase {
 
 // infrastructure/web/controller
 // OJO: esta ruta dual es de core y NO se copia — ver la sección siguiente.
-// En compras va ruta única: @RequestMapping("/api/tesoreria/compras/ordenCompra")
+// En compras va ruta única: @RequestMapping("/api/tesoreria/compras/<recurso>")
 @RestController
 @RequestMapping({"/proveedor", "/api/tesoreria/core/proveedor"})
 @RequiredArgsConstructor
@@ -125,7 +125,7 @@ nuevo que no tiene URLs viejas que preservar.
 
 ```java
 @RestController
-@RequestMapping("/api/tesoreria/compras/ordenCompra")
+@RequestMapping("/api/tesoreria/compras/<recurso>")
 ```
 
 Confirmarlo con el equipo, pero la evidencia del código apunta claramente ahí.
@@ -183,33 +183,22 @@ dominio.
   `RestClient` con el patrón `*UrlResolver` + `*Consumer`; es una referencia válida, pero
   no una convención obligatoria para compras.
 - **API de detalle:** un `GET` de recurso debe devolver los datos necesarios para mostrar
-  ese recurso en una sola respuesta. En particular, el detalle de una orden de compra no
-  obliga al cliente a encadenar llamadas para completar sus datos.
+  ese recurso en una sola respuesta, sin obligar al cliente a encadenar llamadas para
+  completar sus datos.
 - **Asincrónico:** **Kafka** (`spring-kafka`). Core escucha en `tesoreria-core-group`.
   También es obligatorio al arrancar con la configuración actual.
 - **Gateway:** `tesoreria-gateway-service` en el `8301` está delante de los servicios de
   tesorería, para los clientes **externos**. Este servicio **no lo necesita**: resuelve
-  core por Consul directamente y se valida en su propio puerto (8203). El ruteo por
+  core por Consul directamente y se valida en su propio puerto (8096). El ruteo por
   gateway es integración — ver el roadmap.
 
 ## Datos
 
-- **MySQL** (`mysql-connector-j` 9.7.0), esquema `tesium`, Hibernate `ddl-auto: none`
-  — **el esquema se administra fuera de la aplicación; nunca dejar que JPA lo altere.**
-- `open-in-view: false`; pool HikariCP máximo 100.
-- **`compras-service` es dueño de su propia persistencia** para el dominio de órdenes de
-  compra (`OrdenCompra`, niveles de aprobación, centro de costos). Se construyen acá, **no**
-  se agregan a core.
 - **No lee las tablas de core directamente.** Proveedores, artículos, facturas y
   contabilidad se alcanzan por la API REST de core. Dos servicios nunca escriben la misma
   tabla.
-- Abierto: si las tablas de compras van en un esquema separado o junto a `tesium`
-  — ver pregunta abierta 1 del roadmap.
-
-> **Sin estrategia de migraciones todavía.** Core no usa Flyway ni Liquibase, y
-> `ddl-auto` está en `none`: alguien crea las tablas a mano. Como compras ahora es dueño
-> de sus tablas, hay que definir **quién las crea y con qué herramienta** antes de escribir
-> la primera línea de persistencia.
+- `core-service` usa **MySQL** (`mysql-connector-j` 9.7.0), esquema `tesium`, con Hibernate
+  `ddl-auto: none`: el esquema se administra fuera de la aplicación.
 
 ## Qué provee core ya (reusar, no reconstruir)
 
@@ -257,13 +246,10 @@ Regla general que se desprende: **antes de dar por reusable un activo de core, v
 que esté en `hexagonal/` y que tenga controller.** Estar en la base no significa estar
 disponible por API.
 
-**Ausente en core — ésta es la brecha:**
+**Ausente en core:**
 
-- `OrdenCompra` — sin modelo, sin tabla referenciada, sin endpoint. Lo central a construir.
-- Niveles de aprobación / autorización por monto.
 - `CentroCosto`, y la jerarquía de imputación Sede → Unidad Académica → Carrera.
 - Bases de asignación (división automática de facturas).
-- Márgenes de tolerancia entre OC y factura.
 
 ### Contrato verificado de proveedores
 
@@ -350,14 +336,16 @@ sistema operativo concreto.
 
 ## Puertos
 
-Tomados del compose del equipo. Para `compras-service` se reserva el **8203**, siguiente
-puerto libre luego de `guarani:8202`; avisar al equipo al incorporarlo al compose compartido.
+Tomados del compose del equipo. Para `compras-service` se reserva el **8096**, siguiente
+puerto libre luego de `haberes-report:8095`; avisar al equipo al incorporarlo al compose
+compartido.
 
 | Servicio | Puerto |
 |---|---|
 | consul | 8500 |
 | tesoreria-gateway | 8301 |
 | **tesoreria-core** | **8092** |
+| **tesoreria-compras** | **8096** |
 | report | 8281 |
 | chequera-proxy | 8121 |
 | facturador | 8097 |

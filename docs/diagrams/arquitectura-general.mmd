@@ -1,0 +1,83 @@
+```mermaid
+graph TD
+    A["Cliente (front / Gateway)"]
+
+    subgraph "Infrastructure: Web (fachada /api/tesoreria/compras)"
+        B["ApiKeyFilter<br/>X-API-Key"]
+        PEP["RequierePermisoInterceptor<br/>@RequierePermiso"]
+        C["ArticuloController"]
+        C2["ProveedorController"]
+        C3["ProveedorPingController"]
+        C4["PedidoCompraController"]
+        C5["UbicacionController"]
+        C6["UbicacionArticuloController"]
+        C7["SheetController"]
+        D["DTOs + *DtoMapper"]
+    end
+
+    subgraph "Application"
+        E["ArticuloService"]
+        E2["ProveedorService"]
+        E3["PedidoCompraService"]
+        E4["UbicacionService"]
+        E5["UbicacionArticuloService"]
+        E6["SheetService"]
+        F["*UseCaseImpl (una por operación)"]
+    end
+
+    subgraph "Domain (sin frameworks)"
+        G["Modelos: Articulo, Proveedor, PedidoCompra, Ubicacion, UbicacionArticulo"]
+        H["Ports In: *UseCase"]
+        I["Ports Out: ArticuloGateway, ProveedorGateway, CompraPedidoGateway, AutoridadGateway, AutorizanteGateway, EjercicioActualGateway, ContextoGateway, PermisoGateway, HistorialGateway, UbicacionGateway, UbicacionArticuloGateway, SheetGateway"]
+    end
+
+    subgraph "Infrastructure: Client (Feign)"
+        J["*FeignClientAdapter"]
+        K["Core*FeignClient + *Response (contratos de core)"]
+    end
+
+    L["Consul"]
+    M["core-service:8092"]
+
+    A -->|"header X-API-Key"| B
+    B --> PEP
+    PEP -.->|"permiso efectivo"| J
+    PEP --> C
+    PEP --> C2
+    PEP --> C3
+    PEP --> C4
+    PEP --> C5
+    PEP --> C6
+    PEP --> C7
+    C --> D
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    C5 --> D
+    C6 --> D
+    C7 --> D
+    C --> E
+    C2 --> E2
+    C3 --> E2
+    C4 --> E3
+    C5 --> E4
+    C6 --> E5
+    C7 --> E6
+    E --> F
+    E2 --> F
+    E3 --> F
+    E4 --> F
+    E5 --> F
+    E6 --> F
+    F -.-> H
+    E --> I
+    E2 --> I
+    E3 --> I
+    E4 --> I
+    E5 --> I
+    E6 --> I
+    I -.-> J
+    J --> K
+    J -->|"resolver tesoreria-core-service"| L
+    J --> M
+```
