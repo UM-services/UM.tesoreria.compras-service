@@ -390,3 +390,20 @@ dino → develop → staging → main
 En la inicialización del repositorio, `main`, `develop` y `staging` parten de un commit
 vacío. El primer contenido del servicio se incorpora en `dino` y se promociona siguiendo
 este flujo.
+
+### Default branch y creación de ramas de issue
+
+El **default branch del repositorio es `main`**, igual que en el resto de la organización
+(`develop` y `staging` no son default). Es deliberado: si `develop` fuera la default,
+GitHub ofrecería un PR `main → develop` después de cada release, porque los merge commits
+de la promoción dejan a `main` y a `staging` por delante de `develop`.
+
+Las ramas de issue se crean con **"Create a branch"** desde la issue, eligiendo
+**`Source = develop`** en el diálogo (el diálogo propone `main`, que es la default). El
+`Source` es el que define la base real de la rama, no el default; por eso `main` puede
+seguir siendo la default sin romper el flujo.
+
+Regla operativa: **`git fetch origin && git checkout <rama>`** debe arrastrar los cambios
+locales sin abortar. Si la rama nace de un `develop` viejo (o de otra base), el `checkout`
+falla con *"Your local changes to the following files would be overwritten"*. Para
+evitarlo, la rama se crea siempre desde el `develop` vigente (`git pull` antes de crearla).

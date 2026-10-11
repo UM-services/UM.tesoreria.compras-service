@@ -208,7 +208,7 @@ class CoreCompraPedidoFeignClientAdapterTest {
     @Test
     void mapsListWithNullItems() {
         var response = new CoreCompraPedidoResponse(1, null, null, null, "BORRADOR", null, 10, 20, null, null,
-                null, null, null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null, null, null, null);
         when(coreCompraPedidoFeignClient.listarPorSolicitante(
                 new CoreCompraPedidoSearchRequest(null, 10, null, null, null, null))).thenReturn(List.of(response));
 
