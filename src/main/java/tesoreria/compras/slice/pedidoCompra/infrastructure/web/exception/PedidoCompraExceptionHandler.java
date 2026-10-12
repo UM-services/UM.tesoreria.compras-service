@@ -94,4 +94,19 @@ public class PedidoCompraExceptionHandler {
     ProblemDetail handleCotizacionProcesoNotFound(CotizacionProcesoNotFoundException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
     }
+
+    @ExceptionHandler(FormalizacionNotFoundException.class)
+    ProblemDetail handleFormalizacionNotFound(FormalizacionNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(FormalizacionInvalidaException.class)
+    ProblemDetail handleFormalizacionInvalida(FormalizacionInvalidaException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(FormalizacionConflictoException.class)
+    ProblemDetail handleFormalizacionConflicto(FormalizacionConflictoException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
 }
