@@ -8,6 +8,16 @@ sincronizados: `VERSION` es lo que lee el release, `pom.xml` lo que lee Maven.
 
 ---
 
+## [0.9.0] - 2026-10-12
+
+### Agregado
+
+- feat(pedidoCompra): **fachada de la Orden de Compra** (etapa 8 — `PLANIFICACION_COMPRAS.md` §17). Nuevo controller `/api/tesoreria/compras/formalizacion` con permiso `compras.formalizar` (PEP declarativo) y puerto `FormalizacionGateway` (Feign a core, contexto `coreCompraFormalizacionClient`): `GET /pendientes` (adjudicaciones sin OC, con el ejercicio en curso por defecto), `GET` / `POST /search` (listado con filtros), `GET /{id}`, `GET /por-cotizacion/{compraCotizacionId}` y `POST` (emite la OC; el actor llega por `X-User-Id`). Traducción de errores de core a `404`/`400`/`409` (`FormalizacionNotFoundException`/`Invalida`/`Conflicto`) y `503` si core no responde. El instrumento snapshotea proveedor, monto, condiciones e ítems desde la adjudicación; **sin** límite por monto (la cuantía se decidió en la adjudicación).
+
+### Cambiado
+
+- La definición OpenAPI publica la versión del servicio (`0.9.0`).
+
 ## [0.8.0] - 2026-10-11
 
 ### Agregado

@@ -15,6 +15,7 @@ graph TD
         C8["CotizacionTramoController"]
         C9["CotizacionProcesoController"]
         C10["AdjudicacionCotizacionController"]
+        C11["FormalizacionController"]
         D["DTOs + *DtoMapper"]
     end
 
@@ -27,13 +28,14 @@ graph TD
         E6["SheetService"]
         E7["CotizacionTramoService"]
         E8["CotizacionProcesoService"]
+        E9["FormalizacionService"]
         F["*UseCaseImpl (una por operación)"]
     end
 
     subgraph "Domain (sin frameworks)"
-        G["Modelos: Articulo, Proveedor, PedidoCompra, Ubicacion, UbicacionArticulo, CotizacionTramo, CotizacionProceso"]
+        G["Modelos: Articulo, Proveedor, PedidoCompra, Ubicacion, UbicacionArticulo, CotizacionTramo, CotizacionProceso, Formalizacion"]
         H["Ports In: *UseCase"]
-        I["Ports Out: ArticuloGateway, ProveedorGateway, CompraPedidoGateway, AutoridadGateway, AutorizanteGateway, EjercicioActualGateway, ContextoGateway, PermisoGateway, HistorialGateway, UbicacionGateway, UbicacionArticuloGateway, SheetGateway, CotizacionGateway, CotizacionProcesoGateway"]
+        I["Ports Out: ArticuloGateway, ProveedorGateway, CompraPedidoGateway, AutoridadGateway, AutorizanteGateway, EjercicioActualGateway, ContextoGateway, PermisoGateway, HistorialGateway, UbicacionGateway, UbicacionArticuloGateway, SheetGateway, CotizacionGateway, CotizacionProcesoGateway, FormalizacionGateway"]
     end
 
     subgraph "Infrastructure: Client (Feign)"
@@ -57,6 +59,7 @@ graph TD
     PEP --> C8
     PEP --> C9
     PEP --> C10
+    PEP --> C11
     C --> D
     C2 --> D
     C3 --> D
@@ -67,6 +70,7 @@ graph TD
     C8 --> D
     C9 --> D
     C10 --> D
+    C11 --> D
     C --> E
     C2 --> E2
     C3 --> E2
@@ -77,6 +81,7 @@ graph TD
     C8 --> E7
     C9 --> E8
     C10 --> E8
+    C11 --> E9
     E --> F
     E2 --> F
     E3 --> F
@@ -85,6 +90,7 @@ graph TD
     E6 --> F
     E7 --> F
     E8 --> F
+    E9 --> F
     F -.-> H
     E --> I
     E2 --> I
@@ -94,6 +100,7 @@ graph TD
     E6 --> I
     E7 --> I
     E8 --> I
+    E9 --> I
     I -.-> J
     J --> K
     J -->|"resolver tesoreria-core-service"| L
