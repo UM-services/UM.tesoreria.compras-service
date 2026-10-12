@@ -70,3 +70,15 @@ The permission system is **centralized** and lives in `tesoreria-core-service` (
   `GET /api/tesoreria/core/permisoEfectivo/usuario/{userId}` y responde `403` si falta.
 - El **gateway** inyecta `X-API-Key` en `/api/tesoreria/compras/**` (el navegador no la tiene);
   el filtro está acotado a esa ruta nueva, así que no afecta al legacy.
+
+## Cotizaciones (fachada)
+
+- Slice `slice/pedidoCompra` (misma fachada): tramos mínimos (`/cotizacion/tramos`), procesos de
+  cotización (`/cotizacion...`) y el mínimo por pedido (`/pedido/{id}/cotizaciones-minimas`).
+- Permisos: `compras.cotizaciones.configurar` (tramos), `compras.cotizaciones.gestionar` (procesos),
+  `compras.estimar` (mínimo por pedido). Enforcement con `@RequierePermiso` (PEP del servicio).
+- La fachada **no persiste**: consume `core` por Feign (`compraCotizacion`, `compraCotizacionTramo`,
+  `compraPedido`) y resuelve el ejercicio en curso con `EjercicioActualGateway`.
+- Flujo: armar proceso (ítems combinados de varios pedidos + proveedores) → enviar → cargar
+  respuestas → comparar → recomendar (pedidos a `PENDIENTE_ADJUDICACION`) → cerrar.
+  Spec: `specs/2026-10-11-cotizaciones/`; decisiones en `PLANIFICACION_COMPRAS.md` §14.

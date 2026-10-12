@@ -21,6 +21,9 @@ Cada feature abre su carpeta `specs/YYYY-MM-DD-nombre/` cuando se empieza a trab
 | 1 | [Esqueleto del servicio](2026-08-04-esqueleto-servicio/) | ✅ terminado |
 | 2 | [Fachada gateada de Gastos y Proveedores](2026-10-09-fachada-gastos-proveedores/) | 🚧 en curso |
 | 3 | [Especificaciones enriquecidas de los ítems del pedido](2026-10-10-especificaciones-item-pedido/) *(frontend)* | ✅ Fase 0 + C |
+| 4 | [Cotizaciones (pedidos de cotización)](2026-10-11-cotizaciones/) | ✅ Fases 6A/6B/6C |
+| 5 | [Adjudicación por monto y bandeja de respuestas](2026-10-11-adjudicacion/) | ✅ Piezas A y B |
+| 6 | Formalización (Orden de Compra) — etapa 8 · `PLANIFICACION_COMPRAS.md` §17 | ✅ terminado |
 
 El plan de features se redefine con el nuevo alcance. Todo lo demás del circuito
 —facturas, imputación, pagos, notificaciones— vive en core o en otros servicios: ver

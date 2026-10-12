@@ -57,4 +57,56 @@ public class PedidoCompraExceptionHandler {
     ProblemDetail handleSourceUnavailable(PedidoCompraSourceUnavailableException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, exception.getMessage());
     }
+
+    @ExceptionHandler(CotizacionTramoInvalidaException.class)
+    ProblemDetail handleCotizacionInvalida(CotizacionTramoInvalidaException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(CotizacionTramoConflictoException.class)
+    ProblemDetail handleCotizacionConflicto(CotizacionTramoConflictoException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(CotizacionTramoNotFoundException.class)
+    ProblemDetail handleCotizacionNotFound(CotizacionTramoNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(CotizacionesNoConfiguradasException.class)
+    ProblemDetail handleCotizacionesNoConfiguradas(CotizacionesNoConfiguradasException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problem.setProperty("codigo", "COTIZACIONES_NO_CONFIGURADAS");
+        return problem;
+    }
+
+    @ExceptionHandler(CotizacionProcesoInvalidaException.class)
+    ProblemDetail handleCotizacionProcesoInvalida(CotizacionProcesoInvalidaException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(CotizacionProcesoConflictoException.class)
+    ProblemDetail handleCotizacionProcesoConflicto(CotizacionProcesoConflictoException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(CotizacionProcesoNotFoundException.class)
+    ProblemDetail handleCotizacionProcesoNotFound(CotizacionProcesoNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(FormalizacionNotFoundException.class)
+    ProblemDetail handleFormalizacionNotFound(FormalizacionNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(FormalizacionInvalidaException.class)
+    ProblemDetail handleFormalizacionInvalida(FormalizacionInvalidaException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(FormalizacionConflictoException.class)
+    ProblemDetail handleFormalizacionConflicto(FormalizacionConflictoException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
 }

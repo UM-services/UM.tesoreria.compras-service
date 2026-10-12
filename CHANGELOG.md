@@ -4,9 +4,40 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) ·
 Versionado: [SemVer](https://semver.org/lang/es/)
 
 La versión vive en [`VERSION`](VERSION) y en el `<version>` del `pom.xml`; mantener los dos
-sincronizados: `VERSION` es lo que lee el flujo de release, `pom.xml` lo que lee Maven.
+sincronizados: `VERSION` es lo que lee el release, `pom.xml` lo que lee Maven.
 
 ---
+
+## [0.9.0] - 2026-10-12
+
+### Agregado
+
+- feat(pedidoCompra): **fachada de la Orden de Compra** (etapa 8 — `PLANIFICACION_COMPRAS.md` §17). Nuevo controller `/api/tesoreria/compras/formalizacion` con permiso `compras.formalizar` (PEP declarativo) y puerto `FormalizacionGateway` (Feign a core, contexto `coreCompraFormalizacionClient`): `GET /pendientes` (adjudicaciones sin OC, con el ejercicio en curso por defecto), `GET` / `POST /search` (listado con filtros), `GET /{id}`, `GET /por-cotizacion/{compraCotizacionId}` y `POST` (emite la OC; el actor llega por `X-User-Id`). Traducción de errores de core a `404`/`400`/`409` (`FormalizacionNotFoundException`/`Invalida`/`Conflicto`) y `503` si core no responde. El instrumento snapshotea proveedor, monto, condiciones e ítems desde la adjudicación; **sin** límite por monto (la cuantía se decidió en la adjudicación).
+
+### Cambiado
+
+- La definición OpenAPI publica la versión del servicio (`0.9.0`).
+
+## [0.8.0] - 2026-10-11
+
+### Agregado
+
+- feat(pedidoCompra): **Configuración de tramos de cotizaciones mínimas por monto** (fachada gateada sobre la configuración de core). Endpoints nuevos bajo `/api/tesoreria/compras/cotizacion/tramos`, con permiso `compras.cotizaciones.configurar` vía `@RequierePermiso` (PEP declarativo del servicio):
+  - `GET` — lista los tramos (tope en múltiplos de la referencia; `abierto` = tramo sin tope).
+  - `POST` — crea un tramo.
+  - `PUT /{cotizacionTramoId}` — edita un tramo.
+  - `DELETE /{cotizacionTramoId}` — elimina un tramo.
+  Nuevo puerto `CotizacionGateway` (Feign) → `/api/tesoreria/core/compraCotizacionTramo`, con traducción de errores de core a `400/409/404` (`CotizacionTramoInvalidaException`, `CotizacionTramoConflictoException`, `CotizacionTramoNotFoundException`) o `503` si core no responde. La resolución del mínimo por pedido y la gestión de cotizaciones son etapas posteriores.
+- feat(pedidoCompra): el `PedidoCompraResponse` de la fachada expone `cantidadCotizacionesMinima` (espeja la columna nueva de core). No se completa todavía.
+- feat(pedidoCompra): **Mínimo de cotizaciones por pedido** (etapa 6, fase A — `PLANIFICACION_COMPRAS.md` §14). Nuevo endpoint `GET /api/tesoreria/compras/pedido/{id}/cotizaciones-minimas` (permiso `compras.estimar`) que devuelve el snapshot del pedido o el cálculo vigente. Nuevo método `CotizacionGateway.resolverMinimo` (Feign `GET /api/tesoreria/core/compraCotizacionTramo/minimo`) que traduce el `409` de core a `CotizacionesNoConfiguradasException` → `409` con `codigo: COTIZACIONES_NO_CONFIGURADAS` (o `503` si core no responde). La emisión del proceso de cotización y la carga de respuestas son la fase siguiente.
+- feat(pedidoCompra): **Procesos de cotización** (etapa 6, fase B). Nuevos endpoints bajo `/api/tesoreria/compras/cotizacion`, con permiso `compras.cotizaciones.gestionar` (PEP `@RequierePermiso`): `GET /pendientes` (ítems de pedidos autorizados; el ejercicio en curso se resuelve por defecto), `GET /` y `POST /search`, `GET /{id}`, `POST /`, `PUT /{id}`, `POST /{id}/enviar` y `POST /{id}/anular`. Nuevo puerto `CotizacionProcesoGateway` (Feign a core → `/api/tesoreria/core/compraCotizacion`) con traducción de errores a `400/409/404` o `503`. La carga de respuestas es la fase 6C.
+- feat(pedidoCompra): **Respuestas, comparación y recomendación** (etapa 6, fase C). Endpoints nuevos (mismo permiso): `POST /cotizacion/{id}/proveedores/{cpId}/respuesta`, `POST /cotizacion/{id}/proveedores/{cpId}/no-cotiza`, `GET /cotizacion/{id}/comparacion`, `POST /cotizacion/{id}/recomendar` y `POST /cotizacion/{id}/cerrar`. La respuesta incluye el precio por ítem del proceso; al recomendar, los pedidos cubiertos pasan a `PENDIENTE_ADJUDICACION`.
+- feat(pedidoCompra): **Bandeja "Cotizaciones pedidas"** (etapa 7, pieza A — `PLANIFICACION_COMPRAS.md` §15). Nuevo `GET /api/tesoreria/compras/cotizacion/proveedores-pendientes` (permiso `compras.cotizaciones.gestionar`, `@RequierePermiso`): documentos de proveedor en `ENVIADA` de todos los procesos, para cargar sus valores sin entrar proceso por proceso. El ejercicio en curso se resuelve con `EjercicioActualGateway` si no llega. Nuevo método `CotizacionProcesoGateway.respuestasPendientes` (Feign a core). Aditivo; la carga reutiliza el endpoint de respuestas ya existente.
+- feat(pedidoCompra): **Adjudicación por monto** (etapa 7, pieza B). Controlador nuevo `AdjudicacionCotizacionController` bajo `/api/tesoreria/compras/cotizacion/adjudicacion`, con permiso `compras.adjudicacion.autorizar` (PEP `@RequierePermiso`): `GET /bandeja` (procesos `RECOMENDADA`), `GET /limite` y `/limite/{ejercicioId}` (reutiliza `AutoridadGateway` de §11), `POST /{id}/adjudicar` (oferta elegida + fundamento; si no se indica, la recomendada), `POST /{id}/devolver`, `POST /{id}/no-adjudicar` y `GET /{id}`. El límite por monto se valida **fail-closed** contra el **total de la cotización recomendada** (`403 LIMITE_AUTORIZACION_EXCEDIDO`). Nuevos métodos en `CotizacionProcesoGateway` (Feign a core).
+
+### Cambiado
+
+- La definición OpenAPI publica la versión del servicio (`0.8.0`).
 
 ## [0.7.0] - 2026-10-11
 
