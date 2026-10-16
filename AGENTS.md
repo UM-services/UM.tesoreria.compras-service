@@ -28,7 +28,7 @@ in the same change as the code.
   per line; collapsing statements inflates the ratio without adding tests.
 - Annotate every change with impact in `CHANGELOG.md`, in the same commit as the code.
   Keep a Changelog format: unpublished work goes under `## [Unreleased]`, and on release
-  it moves to its version number together with `VERSION` and the `pom.xml` `<version>`.
+  it moves to its version number together with the `pom.xml` `<version>`.
   The changelog belongs to this repository: findings about `core-service` or other
   services go in `specs/`.
 
