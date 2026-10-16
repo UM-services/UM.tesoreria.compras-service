@@ -109,4 +109,19 @@ public class PedidoCompraExceptionHandler {
     ProblemDetail handleFormalizacionConflicto(FormalizacionConflictoException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
+
+    @ExceptionHandler(RecepcionNotFoundException.class)
+    ProblemDetail handleRecepcionNotFound(RecepcionNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(RecepcionInvalidaException.class)
+    ProblemDetail handleRecepcionInvalida(RecepcionInvalidaException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(RecepcionConflictoException.class)
+    ProblemDetail handleRecepcionConflicto(RecepcionConflictoException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
 }

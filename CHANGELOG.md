@@ -14,6 +14,22 @@ La versión vive únicamente en el `<version>` del `pom.xml`.
 - Se elimina el archivo `VERSION`: la versión del servicio queda en un único lugar, el
   `<version>` del `pom.xml`. Sin cambios funcionales.
 
+## [0.10.0] - 2026-10-16
+
+### Agregado
+
+- feat(pedidoCompra): **fachada de la Recepción y conformidad** (etapa 9 — `PLANIFICACION_COMPRAS.md` §18). Nuevo controller `/api/tesoreria/compras/recepcion` con permiso `compras.recepcionar` (PEP declarativo) y puerto `RecepcionGateway` (Feign a core, contexto `coreCompraRecepcionClient`):
+  - `GET /pendientes` — Órdenes de Compra con recepción pendiente (ejercicio en curso por defecto), con el **saldo derivado** por ítem y las entregas ya registradas.
+  - `GET` y `POST /search` — recepciones registradas con filtros (ejercicio, OC, resultado, fechas).
+  - `GET /{id}` y `GET /por-formalizacion/{compraFormalizacionId}` — detalle de la entrega y saldos de la OC.
+  - `POST` — registra una entrega (total o parcial) contra la OC; el actor llega por `X-User-Id`.
+  - `POST /formalizacion/{compraFormalizacionId}/cerrar` — cierre manual con motivo obligatorio (`204`).
+  Traducción de errores de core a `404`/`400`/`409` (`RecepcionNotFoundException`/`Invalida`/`Conflicto`) y `503` si core no responde. El mapeo de `porFormalizacion` convierte el `404` de core en `Optional.empty()`.
+
+### Cambiado
+
+- La definición OpenAPI publica la versión del servicio (`0.10.0`).
+
 ## [0.9.0] - 2026-10-12
 
 ### Agregado
