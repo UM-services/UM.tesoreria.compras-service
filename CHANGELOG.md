@@ -3,10 +3,16 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) ·
 Versionado: [SemVer](https://semver.org/lang/es/)
 
-La versión vive en [`VERSION`](VERSION) y en el `<version>` del `pom.xml`; mantener los dos
-sincronizados: `VERSION` es lo que lee el release, `pom.xml` lo que lee Maven.
+La versión vive únicamente en el `<version>` del `pom.xml`.
 
 ---
+
+## [Unreleased]
+
+### Eliminado
+
+- Se elimina el archivo `VERSION`: la versión del servicio queda en un único lugar, el
+  `<version>` del `pom.xml`. Sin cambios funcionales.
 
 ## [0.9.0] - 2026-10-12
 
