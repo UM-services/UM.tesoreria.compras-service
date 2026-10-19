@@ -9,10 +9,17 @@ La versión vive únicamente en el `<version>` del `pom.xml`.
 
 ## [Unreleased]
 
-### Eliminado
+## [0.10.1] - 2026-10-19
 
-- Se elimina el archivo `VERSION`: la versión del servicio queda en un único lugar, el
-  `<version>` del `pom.xml`. Sin cambios funcionales.
+### Cambiado
+
+- ci(deploy-staging): el job `deploy` corre en matriz contra los entornos `staging` y
+  `staging-new` (`fail-fast: false`), cada uno en el runner self-hosted con la etiqueta de
+  su entorno y con la misma imagen publicada (`${{ github.sha }}`) y el mismo script de
+  despliegue. El fallo de un entorno no cancela el otro; requiere que existan el entorno
+  `staging-new` en GitHub y su runner con esa etiqueta. Sin cambios en el contrato del
+  servicio.
+- La definición OpenAPI publica la versión del servicio (`0.10.1`).
 
 ## [0.10.0] - 2026-10-16
 
@@ -29,6 +36,11 @@ La versión vive únicamente en el `<version>` del `pom.xml`.
 ### Cambiado
 
 - La definición OpenAPI publica la versión del servicio (`0.10.0`).
+
+### Eliminado
+
+- Se elimina el archivo `VERSION`: la versión del servicio queda en un único lugar, el
+  `<version>` del `pom.xml`. Sin cambios funcionales.
 
 ## [0.9.0] - 2026-10-12
 
