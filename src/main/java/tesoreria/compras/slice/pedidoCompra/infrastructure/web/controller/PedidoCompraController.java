@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tesoreria.compras.slice.pedidoCompra.application.service.PedidoCompraService;
+import tesoreria.compras.slice.pedidoCompra.domain.model.BandejaEnvioResumen;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.*;
@@ -32,13 +33,16 @@ public class PedidoCompraController {
     }
 
     @PostMapping("/bandeja")
-    public ResponseEntity<List<PedidoCompraResponse>> bandeja(
+    public ResponseEntity<BandejaPedidoResponse> bandeja(
             @RequestHeader(value = USER_ID_HEADER, required = false) Long userId,
             @RequestBody(required = false) BandejaPedidoRequest request) {
         String estado = request == null ? null : request.estado();
-        return ResponseEntity.ok(pedidoCompraService.bandeja(userId, estado).stream()
-                .map(pedidoCompraDtoMapper::toResponse)
-                .toList());
+        BandejaEnvioResumen bandeja = pedidoCompraService.bandeja(userId, estado);
+        List<Integer> dependenciaIds = bandeja.dependenciaIds() == null ? List.of() : bandeja.dependenciaIds();
+        return ResponseEntity.ok(new BandejaPedidoResponse(
+                bandeja.pedidos().stream().map(pedidoCompraDtoMapper::toResponse).toList(),
+                dependenciaIds,
+                dependenciaIds.isEmpty()));
     }
 
     @PostMapping("/consulta")

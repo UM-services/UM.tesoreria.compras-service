@@ -145,7 +145,10 @@ class PedidoCompraUseCasesTest {
 
         var useCase = new ListBandejaEnvioUseCaseImpl(autorizanteGateway, compraPedidoGateway);
 
-        assertThat(useCase.listar(10L, "PENDIENTE_ENVIO")).hasSize(1);
+        var bandeja = useCase.listar(10L, "PENDIENTE_ENVIO");
+
+        assertThat(bandeja.pedidos()).hasSize(1);
+        assertThat(bandeja.dependenciaIds()).containsExactly(20, 21);
         var captor = org.mockito.ArgumentCaptor.forClass(PedidoCompraFiltro.class);
         verify(compraPedidoGateway).listar(captor.capture());
         assertThat(captor.getValue().dependenciaIds()).containsExactly(20, 21);
@@ -158,7 +161,10 @@ class PedidoCompraUseCasesTest {
 
         var useCase = new ListBandejaEnvioUseCaseImpl(autorizanteGateway, compraPedidoGateway);
 
-        assertThat(useCase.listar(10L, null)).isEmpty();
+        var bandeja = useCase.listar(10L, null);
+
+        assertThat(bandeja.pedidos()).isEmpty();
+        assertThat(bandeja.dependenciaIds()).isEmpty();
         verifyNoInteractions(compraPedidoGateway);
     }
 
