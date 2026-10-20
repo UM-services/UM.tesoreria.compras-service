@@ -9,6 +9,18 @@ La versión vive únicamente en el `<version>` del `pom.xml`.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-20
+
+### Cambiado
+
+- feat(pedidoCompra): `POST /api/tesoreria/compras/pedido/bandeja` pasa de devolver un array
+  a `{ pedidos, dependenciaIds, sinDependencias }`. La fachada conserva las dependencias
+  habilitadas del autorizante (el caso de uso ahora devuelve `BandejaEnvio`) y expone
+  `sinDependencias`, para que el cliente explique una bandeja vacía por falta de asignación
+  en lugar de mostrarla como "sin pedidos". **Cambio de contrato**: requiere desplegar en
+  conjunto con el frontend de compras.
+- La definición OpenAPI publica la versión del servicio (`0.11.0`).
+
 ## [0.10.1] - 2026-10-19
 
 ### Cambiado

@@ -9,6 +9,8 @@ import tesoreria.compras.slice.pedidoCompra.domain.exception.LimiteAutorizacionE
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraEstadoInvalidoException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraSourceUnavailableException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PermisoDenegadoException;
+import tesoreria.compras.slice.pedidoCompra.domain.model.BandejaEnvio;
+import tesoreria.compras.slice.pedidoCompra.domain.model.BandejaEnvioResumen;
 import tesoreria.compras.slice.pedidoCompra.domain.model.ContextoInicioPedido;
 import tesoreria.compras.slice.pedidoCompra.domain.model.LimiteAutorizacion;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
@@ -195,9 +197,15 @@ public class PedidoCompraService {
         return rechazarPresupuestoPedidoCompraUseCase.rechazar(compraPedidoId, userId, motivo);
     }
 
-    public List<PedidoCompraResumen> bandeja(Long userId, String estado) {
+    /**
+     * Bandeja del autorizante. Devuelve también las dependencias habilitadas del usuario para
+     * que la presentación pueda explicar una bandeja vacía por falta de asignación.
+     */
+    public BandejaEnvioResumen bandeja(Long userId, String estado) {
         verificarPermiso(userId, PERMISO_ENVIAR_PEDIDO);
-        return enriquecerPedidosUseCase.enriquecer(listBandejaEnvioUseCase.listar(userId, estado));
+        BandejaEnvio bandeja = listBandejaEnvioUseCase.listar(userId, estado);
+        List<Integer> dependenciaIds = bandeja.dependenciaIds() == null ? List.of() : bandeja.dependenciaIds();
+        return new BandejaEnvioResumen(dependenciaIds, enriquecerPedidosUseCase.enriquecer(bandeja.pedidos()));
     }
 
     public List<PedidoCompraResumen> consulta(Long userId, PedidoCompraFiltro filtro) {
