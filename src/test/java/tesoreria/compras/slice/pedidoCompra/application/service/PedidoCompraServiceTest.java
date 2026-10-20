@@ -14,6 +14,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.exception.LimiteAutorizacionE
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraEstadoInvalidoException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraSourceUnavailableException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PermisoDenegadoException;
+import tesoreria.compras.slice.pedidoCompra.domain.model.BandejaEnvio;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.in.*;
@@ -210,10 +211,26 @@ class PedidoCompraServiceTest {
     void bandejaDelegaYEnriquece() {
         conPermisos(PedidoCompraService.PERMISO_ENVIAR_PEDIDO);
         when(listBandejaEnvioUseCase.listar(10L, "PENDIENTE_ENVIO"))
-                .thenReturn(List.of(PedidoCompraFixture.pedidoPendienteEnvio()));
+                .thenReturn(new BandejaEnvio(List.of(20),
+                        List.of(PedidoCompraFixture.pedidoPendienteEnvio())));
         when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of(PedidoCompraFixture.resumen()));
 
-        assertThat(service.bandeja(10L, "PENDIENTE_ENVIO")).hasSize(1);
+        var bandeja = service.bandeja(10L, "PENDIENTE_ENVIO");
+
+        assertThat(bandeja.dependenciaIds()).containsExactly(20);
+        assertThat(bandeja.pedidos()).hasSize(1);
+    }
+
+    @Test
+    void bandejaSinDependenciasLoInformaSinPedidos() {
+        conPermisos(PedidoCompraService.PERMISO_ENVIAR_PEDIDO);
+        when(listBandejaEnvioUseCase.listar(10L, null)).thenReturn(new BandejaEnvio(List.of(), List.of()));
+        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of());
+
+        var bandeja = service.bandeja(10L, null);
+
+        assertThat(bandeja.dependenciaIds()).isEmpty();
+        assertThat(bandeja.pedidos()).isEmpty();
     }
 
     @Test

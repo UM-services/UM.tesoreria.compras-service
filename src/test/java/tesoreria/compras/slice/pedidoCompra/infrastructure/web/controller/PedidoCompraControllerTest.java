@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tesoreria.compras.slice.pedidoCompra.PedidoCompraFixture;
 import tesoreria.compras.slice.pedidoCompra.application.service.PedidoCompraService;
+import tesoreria.compras.slice.pedidoCompra.domain.model.BandejaEnvioResumen;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.BandejaPedidoRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.ConsultaPedidoRequest;
@@ -114,9 +115,26 @@ class PedidoCompraControllerTest {
     @Test
     void bandejaDelega() {
         when(pedidoCompraService.bandeja(10L, "PENDIENTE_ENVIO"))
-                .thenReturn(List.of(PedidoCompraFixture.resumen()));
+                .thenReturn(new BandejaEnvioResumen(List.of(20),
+                        List.of(PedidoCompraFixture.resumen())));
 
-        assertThat(controller.bandeja(10L, new BandejaPedidoRequest("PENDIENTE_ENVIO")).getBody()).hasSize(1);
+        var response = controller.bandeja(10L, new BandejaPedidoRequest("PENDIENTE_ENVIO")).getBody();
+
+        assertThat(response.pedidos()).hasSize(1);
+        assertThat(response.dependenciaIds()).containsExactly(20);
+        assertThat(response.sinDependencias()).isFalse();
+    }
+
+    @Test
+    void bandejaSinDependenciasMarcaElMotivo() {
+        when(pedidoCompraService.bandeja(10L, null))
+                .thenReturn(new BandejaEnvioResumen(List.of(), List.of()));
+
+        var response = controller.bandeja(10L, null).getBody();
+
+        assertThat(response.pedidos()).isEmpty();
+        assertThat(response.dependenciaIds()).isEmpty();
+        assertThat(response.sinDependencias()).isTrue();
     }
 
     @Test
