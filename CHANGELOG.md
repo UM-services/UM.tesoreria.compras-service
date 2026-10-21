@@ -9,6 +9,19 @@ La versión vive únicamente en el `<version>` del `pom.xml`.
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-10-21
+
+### Cambiado
+
+- chore(consul): el chequeo que Consul usa para el registro del servicio pasa del health
+  agregado (`/actuator/health`) al **readiness** (`/actuator/health/readiness`), que no
+  incluye las dependencias externas; además, el servicio se poda del catálogo si el chequeo
+  queda crítico durante 5 minutos (`health-check-critical-timeout: 5m`). Evita que una
+  degradación de `core-service` marque la instancia como crítica en Consul y la saque de
+  rotación. Los *probes* ya estaban habilitados (`management.endpoint.health.probes.enabled`).
+  Sin cambios en el contrato del servicio.
+- La definición OpenAPI publica la versión del servicio (`0.11.1`).
+
 ## [0.11.0] - 2026-10-20
 
 ### Cambiado
