@@ -13,11 +13,11 @@ no dos.
 | | Versión | Nota |
 |---|---|---|
 | Java | **25** | `<java.version>25</java.version>` |
-| Spring Boot | **4.1.1** | vía `spring-boot-starter-parent` |
-| Spring Cloud | **2025.1.3** | |
+| Spring Boot | **4.1.2** | vía `spring-boot-starter-parent` |
+| Spring Cloud | **2025.1.4** | |
 | Maven | 3.x | core no tiene wrapper; usa `maven:3-eclipse-temurin-25-alpine` en el build |
-| Lombok | 1.18.38 | `@RequiredArgsConstructor` + inyección por constructor es el estilo de la casa |
-| Kotlin | 2.4.10 | la propiedad está declarada, pero el código está **migrando activamente** de Kotlin a Java — escribir código nuevo en Java |
+| Lombok | 1.18.48 | `@RequiredArgsConstructor` + inyección por constructor es el estilo de la casa |
+| Kotlin | 2.4.21 | la propiedad está declarada, pero el código está **migrando activamente** de Kotlin a Java — escribir código nuevo en Java |
 
 ## Arquitectura
 
