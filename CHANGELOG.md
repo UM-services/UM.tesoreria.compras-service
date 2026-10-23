@@ -9,6 +9,26 @@ La versión vive únicamente en el `<version>` del `pom.xml`.
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-10-23
+
+### Cambiado
+
+- chore(deps): Spring Boot `4.1.1` → `4.1.2` (vía `spring-boot-starter-parent`), Spring Cloud
+  `2025.1.3` → `2025.1.4`, Lombok `1.18.38` → `1.18.48` y `jacoco-maven-plugin`
+  `0.8.13` → `0.8.15`. Sin cambios en el contrato del servicio; las puertas de cobertura
+  (80 % línea, 75 % rama, 70 % línea por clase) se mantienen.
+- `specs/tech-stack.md` se alinea con el `pom.xml` vigente: Spring Boot `4.1.2`, Spring Cloud
+  `2025.1.4`, Lombok `1.18.48` y Kotlin `2.4.21`.
+- La definición OpenAPI publica la versión del servicio (`0.11.2`).
+
+### Corregido
+
+- fix(consul): la resolución de instancias por parte de Feign/LoadBalancer pasa a pedir sólo
+  instancias con los checks en `passing` (`spring.cloud.consul.discovery.query-passing: true`).
+  Complementa el registro contra el readiness y la poda por criticidad de `0.11.1`: una
+  instancia degradada ya no se resuelve mientras Consul todavía no la marcó crítica. Sin
+  cambios en el contrato del servicio.
+
 ## [0.11.1] - 2026-10-21
 
 ### Cambiado
