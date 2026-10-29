@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
-        info = @Info(title = "UM Tesoreria Compras Service", version = "0.11.1"),
+        info = @Info(title = "UM Tesoreria Compras Service", version = "0.11.2"),
         security = @SecurityRequirement(name = "api-key")
 )
 @SecurityScheme(
