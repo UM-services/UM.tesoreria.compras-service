@@ -25,6 +25,7 @@ public record PedidoCompra(
         Boolean montoConocido,
         BigDecimal montoEstimado,
         String fuenteEstimacion,
+        Integer cantidadCotizacionesMinima,
         LocalDateTime fechaEnvio,
         String rechazoMotivo,
         String descartadoMotivo,
@@ -42,6 +43,7 @@ public record PedidoCompra(
                 solicitanteId == null ? null : solicitanteId.intValue(),
                 dependenciaId, facultadId, geograficaId, necesidad, fechaRequerida, urgente,
                 urgenciaMotivo, montoConocido, montoEstimado, fuenteEstimacion,
+                cantidadCotizacionesMinima,
                 fechaEnvio, rechazoMotivo, descartadoMotivo, items);
     }
 }

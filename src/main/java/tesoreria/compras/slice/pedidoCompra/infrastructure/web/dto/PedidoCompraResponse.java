@@ -22,6 +22,7 @@ public record PedidoCompraResponse(
         Boolean montoConocido,
         BigDecimal montoEstimado,
         String fuenteEstimacion,
+        Integer cantidadCotizacionesMinima,
         LocalDateTime fechaEnvio,
         String rechazoMotivo,
         String descartadoMotivo,

@@ -19,6 +19,15 @@ public class LimiteAutorizacionExcedidoException extends RuntimeException {
         this.limite = limite;
     }
 
+    /** Variante para referencias que no son un pedido (p. ej. la adjudicación de un proceso). */
+    public LimiteAutorizacionExcedidoException(String referencia, BigDecimal monto, BigDecimal limite) {
+        super("El monto " + monto + " supera el límite de autorización"
+                + (limite != null ? " (" + limite + ")" : " (límite no disponible)")
+                + " para " + referencia);
+        this.monto = monto;
+        this.limite = limite;
+    }
+
     public BigDecimal getMonto() {
         return monto;
     }

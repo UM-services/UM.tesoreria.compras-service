@@ -21,6 +21,7 @@ public record CoreCompraPedidoResponse(
         Boolean montoConocido,
         java.math.BigDecimal montoEstimado,
         String fuenteEstimacion,
+        Integer cantidadCotizacionesMinima,
         java.time.LocalDateTime fechaEnvio,
         String rechazoMotivo,
         String descartadoMotivo,

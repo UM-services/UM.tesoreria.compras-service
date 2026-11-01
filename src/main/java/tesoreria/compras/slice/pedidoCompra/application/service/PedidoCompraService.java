@@ -9,6 +9,8 @@ import tesoreria.compras.slice.pedidoCompra.domain.exception.LimiteAutorizacionE
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraEstadoInvalidoException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PedidoCompraSourceUnavailableException;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.PermisoDenegadoException;
+import tesoreria.compras.slice.pedidoCompra.domain.model.BandejaEnvio;
+import tesoreria.compras.slice.pedidoCompra.domain.model.BandejaEnvioResumen;
 import tesoreria.compras.slice.pedidoCompra.domain.model.ContextoInicioPedido;
 import tesoreria.compras.slice.pedidoCompra.domain.model.LimiteAutorizacion;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
@@ -18,6 +20,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraResumen;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.in.*;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutoridadGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutorizanteGateway;
+import tesoreria.compras.slice.pedidoCompra.domain.ports.out.CotizacionGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.EjercicioActualGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.PermisoGateway;
 
@@ -65,6 +68,7 @@ public class PedidoCompraService {
     private final RechazarPresupuestoPedidoCompraUseCase rechazarPresupuestoPedidoCompraUseCase;
     private final AutoridadGateway autoridadGateway;
     private final EjercicioActualGateway ejercicioActualGateway;
+    private final CotizacionGateway cotizacionGateway;
 
     public ContextoInicioPedido getContexto(Long userId) {
         verificarPermiso(userId, PERMISO_INICIAR_PEDIDO);
@@ -151,6 +155,23 @@ public class PedidoCompraService {
     }
 
     /**
+     * Mínimo de cotizaciones del pedido: el snapshot ya cargado, o el cálculo con la configuración
+     * vigente (tramos × referencia). {@code null} si el pedido aún no tiene monto estimado. Lanza
+     * {@code COTIZACIONES_NO_CONFIGURADAS} (409) si la configuración no permite resolverlo.
+     */
+    public Integer cotizacionesMinimas(Long userId, Integer compraPedidoId) {
+        verificarPermiso(userId, PERMISO_ESTIMAR);
+        PedidoCompra pedido = getPedidoCompraUseCase.getById(compraPedidoId);
+        if (pedido.cantidadCotizacionesMinima() != null) {
+            return pedido.cantidadCotizacionesMinima();
+        }
+        if (pedido.montoEstimado() == null) {
+            return null;
+        }
+        return cotizacionGateway.resolverMinimo(pedido.ejercicioId(), pedido.montoEstimado());
+    }
+
+    /**
      * Autoriza el inicio del proceso de pedido de presupuesto. Fail-closed: exige permiso, que el
      * pedido esté pendiente de autorización y que el monto no supere el límite del usuario
      * ({@code multiplico × referencia}, o ilimitado).
@@ -176,9 +197,15 @@ public class PedidoCompraService {
         return rechazarPresupuestoPedidoCompraUseCase.rechazar(compraPedidoId, userId, motivo);
     }
 
-    public List<PedidoCompraResumen> bandeja(Long userId, String estado) {
+    /**
+     * Bandeja del autorizante. Devuelve también las dependencias habilitadas del usuario para
+     * que la presentación pueda explicar una bandeja vacía por falta de asignación.
+     */
+    public BandejaEnvioResumen bandeja(Long userId, String estado) {
         verificarPermiso(userId, PERMISO_ENVIAR_PEDIDO);
-        return enriquecerPedidosUseCase.enriquecer(listBandejaEnvioUseCase.listar(userId, estado));
+        BandejaEnvio bandeja = listBandejaEnvioUseCase.listar(userId, estado);
+        List<Integer> dependenciaIds = bandeja.dependenciaIds() == null ? List.of() : bandeja.dependenciaIds();
+        return new BandejaEnvioResumen(dependenciaIds, enriquecerPedidosUseCase.enriquecer(bandeja.pedidos()));
     }
 
     public List<PedidoCompraResumen> consulta(Long userId, PedidoCompraFiltro filtro) {

@@ -199,6 +199,7 @@ public class CoreCompraPedidoFeignClientAdapter implements CompraPedidoGateway {
                 response.montoConocido(),
                 response.montoEstimado(),
                 response.fuenteEstimacion(),
+                response.cantidadCotizacionesMinima(),
                 response.fechaEnvio(),
                 response.rechazoMotivo(),
                 response.descartadoMotivo(),
