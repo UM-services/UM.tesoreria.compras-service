@@ -19,33 +19,33 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CoreCompraPedidoAutorizanteFeignClientAdapterTest {
+class CoreAutorizanteEnvioFeignClientAdapterTest {
 
     @Mock
-    private CoreCompraPedidoAutorizanteFeignClient coreCompraPedidoAutorizanteFeignClient;
+    private CoreAutorizanteEnvioFeignClient coreAutorizanteEnvioFeignClient;
 
     @InjectMocks
-    private CoreCompraPedidoAutorizanteFeignClientAdapter adapter;
+    private CoreAutorizanteEnvioFeignClientAdapter adapter;
 
     @Test
     void devuelveLasDependenciasAutorizadas() {
-        when(coreCompraPedidoAutorizanteFeignClient.getDependencias(10L))
-                .thenReturn(PedidoCompraFixture.coreAutorizanteResponse(List.of(20, 21)));
+        when(coreAutorizanteEnvioFeignClient.getDependencias(10L))
+                .thenReturn(PedidoCompraFixture.coreAutorizanteEnvioResponse(List.of(20, 21)));
 
         assertThat(adapter.getDependenciasAutorizadas(10L)).containsExactly(20, 21);
     }
 
     @Test
     void listaNulaDevuelveListaVacia() {
-        when(coreCompraPedidoAutorizanteFeignClient.getDependencias(10L))
-                .thenReturn(PedidoCompraFixture.coreAutorizanteResponse(null));
+        when(coreAutorizanteEnvioFeignClient.getDependencias(10L))
+                .thenReturn(PedidoCompraFixture.coreAutorizanteEnvioResponse(null));
 
         assertThat(adapter.getDependenciasAutorizadas(10L)).isEmpty();
     }
 
     @Test
     void notFoundDevuelveListaVacia() {
-        when(coreCompraPedidoAutorizanteFeignClient.getDependencias(10L))
+        when(coreAutorizanteEnvioFeignClient.getDependencias(10L))
                 .thenThrow(new FeignException.NotFound("nf", request(), new byte[0], Map.of()));
 
         assertThat(adapter.getDependenciasAutorizadas(10L)).isEmpty();
@@ -53,7 +53,7 @@ class CoreCompraPedidoAutorizanteFeignClientAdapterTest {
 
     @Test
     void unavailableLanzaSourceUnavailable() {
-        when(coreCompraPedidoAutorizanteFeignClient.getDependencias(10L))
+        when(coreAutorizanteEnvioFeignClient.getDependencias(10L))
                 .thenThrow(new FeignException.ServiceUnavailable("down", request(), new byte[0], Map.of()));
 
         assertThatThrownBy(() -> adapter.getDependenciasAutorizadas(10L))
@@ -62,7 +62,7 @@ class CoreCompraPedidoAutorizanteFeignClientAdapterTest {
 
     private Request request() {
         return Request.create(Request.HttpMethod.GET,
-                "http://core-service.test/api/tesoreria/core/compraPedidoAutorizante/dependencias/10",
+                "http://core-service.test/api/tesoreria/core/compras/autorizanteEnvio/usuario/10",
                 Map.of(), null, StandardCharsets.UTF_8);
     }
 }

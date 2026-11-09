@@ -115,8 +115,8 @@ public final class PedidoCompraFixture {
                 null, null, null, null, null, List.of(coreItemResponse()));
     }
 
-    public static CoreCompraPedidoAutorizanteResponse coreAutorizanteResponse(List<Integer> dependenciaIds) {
-        return new CoreCompraPedidoAutorizanteResponse(10, dependenciaIds);
+    public static CoreAutorizanteEnvioResponse coreAutorizanteEnvioResponse(List<Integer> dependenciaIds) {
+        return new CoreAutorizanteEnvioResponse(10, dependenciaIds);
     }
 
     public static CoreCompraPedidoHistorialResponse coreHistorialResponse() {
