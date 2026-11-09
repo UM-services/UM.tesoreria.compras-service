@@ -6,20 +6,22 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 @FeignClient(name = "tesoreria-core-service", contextId = "coreCompraCotizacionClient")
 public interface CoreCompraCotizacionFeignClient {
 
-    @GetMapping("/api/tesoreria/core/compraCotizacion/pendientes")
-    List<CoreCompraCotizacionPendienteResponse> pendientes(@RequestParam("ejercicioId") Integer ejercicioId,
-                                                           @RequestParam("dependenciaIds") List<Integer> dependenciaIds);
+    @PostMapping("/api/tesoreria/core/compraCotizacion/pendientes")
+    List<CoreCompraCotizacionPendienteResponse> pendientes(
+            @RequestBody CoreCompraCotizacionPendientesRequest request);
 
     @GetMapping("/api/tesoreria/core/compraCotizacion/proveedores-pendientes")
-    List<CoreCompraCotizacionProveedorPendienteResponse> proveedoresPendientes(
-            @RequestParam("ejercicioId") Integer ejercicioId);
+    List<CoreCompraCotizacionProveedorPendienteResponse> proveedoresPendientes();
+
+    @GetMapping("/api/tesoreria/core/compraCotizacion/proveedores-pendientes/{ejercicioId}")
+    List<CoreCompraCotizacionProveedorPendienteResponse> proveedoresPendientesPorEjercicio(
+            @PathVariable("ejercicioId") Integer ejercicioId);
 
     @GetMapping("/api/tesoreria/core/compraCotizacion")
     List<CoreCompraCotizacionResponse> findAll();    @PostMapping("/api/tesoreria/core/compraCotizacion/search")

@@ -53,8 +53,9 @@ The permission system is **centralized** and lives in `tesoreria-core-service` (
 `GET /api/tesoreria/core/permisoEfectivo/usuario/{userId}`). Keys follow the
 `modulo.accion` convention (e.g. `compras.orden_aprobar`).
 
-- If you add a new feature that requires a permission: register the key in the catalog
-  (from the administrador module) and wire it in the **new** code. Server-side
+- If you add a new feature that requires a permission: register the key in
+  `tesoreria-core-service/src/main/resources/permisos.yaml` (the versioned inventory; the
+  Catálogo screen is read-only) and wire it in the **new** code. Server-side
   enforcement (`@RequierePermiso`) lives in core; this service has **none**.
 - **Golden rule:** never add or change security on existing endpoints or legacy code.
   The legacy system sends no token or permissions: any enforcement there breaks it.

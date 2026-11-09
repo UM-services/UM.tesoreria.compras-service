@@ -53,7 +53,7 @@ public final class PedidoCompraFixture {
                 null, LocalDateTime.of(2026, 10, 8, 12, 0), null, null, List.of(item()));
     }
 
-    /** Pedido estimado con el snapshot del mínimo de cotizaciones ya cargado. */
+    /** Pedido estimado con el snapshot del mínimo de presupuestos ya cargado. */
     public static PedidoCompra pedidoConMinimo(Integer cantidadMinima) {
         return new PedidoCompra(1, "PC-2026-000001", 7, LocalDateTime.of(2026, 10, 7, 9, 0),
                 "PENDIENTE_AUTORIZACION_PRESUPUESTO", 10, 10, 20, 30, 40,
@@ -73,8 +73,12 @@ public final class PedidoCompraFixture {
     }
 
     public static PedidoCompraResumen resumen() {
-        return new PedidoCompraResumen(pedidoPendienteEnvio(),
-                "Dirección General de Administración", "Usuario Demo");
+        return resumen(pedidoPendienteEnvio());
+    }
+
+    public static PedidoCompraResumen resumen(PedidoCompra pedido) {
+        return new PedidoCompraResumen(pedido,
+                "Dirección General de Administración", "Usuario Demo", "udemo");
     }
 
     public static PedidoCompra pedidoSinIdentidad() {

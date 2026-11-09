@@ -30,7 +30,8 @@ public class CoreCompraCotizacionFeignClientAdapter implements CotizacionProceso
     @Override
     public List<CotizacionPendiente> pendientes(Integer ejercicioId, List<Integer> dependenciaIds) {
         try {
-            return client.pendientes(ejercicioId, dependenciaIds == null ? List.of() : dependenciaIds).stream()
+            return client.pendientes(new CoreCompraCotizacionPendientesRequest(
+                            ejercicioId, dependenciaIds == null ? List.of() : dependenciaIds)).stream()
                     .map(this::toDomain)
                     .toList();
         } catch (FeignException exception) {
@@ -41,7 +42,10 @@ public class CoreCompraCotizacionFeignClientAdapter implements CotizacionProceso
     @Override
     public List<CotizacionProcesoProveedorPendiente> respuestasPendientes(Integer ejercicioId) {
         try {
-            return client.proveedoresPendientes(ejercicioId).stream().map(this::toDomain).toList();
+            List<CoreCompraCotizacionProveedorPendienteResponse> responses = ejercicioId == null
+                    ? client.proveedoresPendientes()
+                    : client.proveedoresPendientesPorEjercicio(ejercicioId);
+            return responses.stream().map(this::toDomain).toList();
         } catch (FeignException exception) {
             throw new PedidoCompraSourceUnavailableException(exception);
         }
@@ -80,9 +84,9 @@ public class CoreCompraCotizacionFeignClientAdapter implements CotizacionProceso
         try {
             return toDomain(client.create(toRequest(proceso)));
         } catch (FeignException.BadRequest exception) {
-            throw new CotizacionProcesoInvalidaException("Los datos del proceso de cotización son inválidos");
+            throw new CotizacionProcesoInvalidaException("Los datos del proceso de presupuesto son inválidos");
         } catch (FeignException.Conflict exception) {
-            throw new CotizacionProcesoConflictoException("El proceso de cotización entra en conflicto");
+            throw new CotizacionProcesoConflictoException("El proceso de presupuesto entra en conflicto");
         } catch (FeignException exception) {
             throw new PedidoCompraSourceUnavailableException(exception);
         }
@@ -95,7 +99,7 @@ public class CoreCompraCotizacionFeignClientAdapter implements CotizacionProceso
         } catch (FeignException.NotFound exception) {
             throw new CotizacionProcesoNotFoundException(compraCotizacionId);
         } catch (FeignException.BadRequest exception) {
-            throw new CotizacionProcesoInvalidaException("Los datos del proceso de cotización son inválidos");
+            throw new CotizacionProcesoInvalidaException("Los datos del proceso de presupuesto son inválidos");
         } catch (FeignException.Conflict exception) {
             throw new CotizacionProcesoConflictoException("Sólo un borrador puede editarse");
         } catch (FeignException exception) {
@@ -111,7 +115,7 @@ public class CoreCompraCotizacionFeignClientAdapter implements CotizacionProceso
             throw new CotizacionProcesoNotFoundException(compraCotizacionId);
         } catch (FeignException.Conflict exception) {
             throw new CotizacionProcesoConflictoException(
-                    "El proceso no puede enviarse (faltan ítems, proveedores o el mínimo de cotizaciones)");
+                    "El proceso no puede enviarse (faltan ítems, proveedores o el mínimo de presupuestos)");
         } catch (FeignException exception) {
             throw new PedidoCompraSourceUnavailableException(exception);
         }

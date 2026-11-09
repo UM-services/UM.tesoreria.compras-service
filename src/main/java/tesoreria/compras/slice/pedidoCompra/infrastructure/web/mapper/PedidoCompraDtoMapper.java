@@ -27,17 +27,19 @@ public class PedidoCompraDtoMapper {
     }
 
     public PedidoCompraResponse toResponse(PedidoCompra domain) {
-        return build(domain, null, null);
+        return build(domain, null, null, null);
     }
 
     public PedidoCompraResponse toResponse(PedidoCompraResumen resumen) {
         if (resumen == null) {
             return null;
         }
-        return build(resumen.pedido(), resumen.dependenciaNombre(), resumen.solicitanteNombre());
+        return build(resumen.pedido(), resumen.dependenciaNombre(), resumen.solicitanteNombre(),
+                resumen.solicitanteLogin());
     }
 
-    private PedidoCompraResponse build(PedidoCompra domain, String dependenciaNombre, String solicitanteNombre) {
+    private PedidoCompraResponse build(PedidoCompra domain, String dependenciaNombre, String solicitanteNombre,
+                                       String solicitanteLogin) {
         if (domain == null) {
             return null;
         }
@@ -47,7 +49,7 @@ public class PedidoCompraDtoMapper {
                 domain.geograficaId(), domain.necesidad(), domain.fechaRequerida(), domain.urgente(),
                 domain.urgenciaMotivo(), domain.montoConocido(), domain.montoEstimado(),
                 domain.fuenteEstimacion(), domain.cantidadCotizacionesMinima(), domain.fechaEnvio(), domain.rechazoMotivo(), domain.descartadoMotivo(),
-                dependenciaNombre, solicitanteNombre,
+                dependenciaNombre, solicitanteNombre, solicitanteLogin,
                 toResponseItems(domain.items()));
     }
 
