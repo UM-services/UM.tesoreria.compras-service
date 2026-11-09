@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -13,7 +12,11 @@ import java.util.List;
 public interface CoreCompraFormalizacionFeignClient {
 
     @GetMapping("/api/tesoreria/core/compraFormalizacion/pendientes")
-    List<CoreCompraFormalizacionPendienteResponse> pendientes(@RequestParam("ejercicioId") Integer ejercicioId);
+    List<CoreCompraFormalizacionPendienteResponse> pendientes();
+
+    @GetMapping("/api/tesoreria/core/compraFormalizacion/pendientes/{ejercicioId}")
+    List<CoreCompraFormalizacionPendienteResponse> pendientesPorEjercicio(
+            @PathVariable("ejercicioId") Integer ejercicioId);
 
     @GetMapping("/api/tesoreria/core/compraFormalizacion")
     List<CoreCompraFormalizacionResponse> findAll();

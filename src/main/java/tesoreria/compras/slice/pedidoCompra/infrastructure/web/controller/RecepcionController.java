@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tesoreria.compras.configuration.security.RequierePermiso;
 import tesoreria.compras.slice.pedidoCompra.application.service.RecepcionService;
@@ -38,22 +37,25 @@ public class RecepcionController {
     private final RecepcionService recepcionService;
     private final RecepcionDtoMapper recepcionDtoMapper;
 
-    /** Órdenes de Compra del ejercicio con recepción pendiente. */
+    /** Órdenes de Compra del ejercicio en curso con recepción pendiente. */
     @GetMapping("/pendientes")
+    public ResponseEntity<List<RecepcionPendienteResponse>> pendientes() {
+        return pendientes(null);
+    }
+
+    /** Órdenes de Compra del ejercicio indicado con recepción pendiente. */
+    @GetMapping("/pendientes/{ejercicioId}")
     public ResponseEntity<List<RecepcionPendienteResponse>> pendientes(
-            @RequestParam(required = false) Integer ejercicioId) {
+            @PathVariable Integer ejercicioId) {
         return ResponseEntity.ok(recepcionService.pendientes(ejercicioId).stream()
                 .map(recepcionDtoMapper::toResponse)
                 .toList());
     }
 
     @GetMapping
-    public ResponseEntity<List<RecepcionResponse>> listar(
-            @RequestParam(required = false) Integer ejercicioId,
-            @RequestParam(required = false) Long compraFormalizacionId,
-            @RequestParam(required = false) String resultado) {
-        return ResponseEntity.ok(recepcionService.listar(new RecepcionFiltro(ejercicioId, compraFormalizacionId,
-                        resultado, null, null)).stream()
+    public ResponseEntity<List<RecepcionResponse>> listar() {
+        return ResponseEntity.ok(recepcionService.listar(
+                        new RecepcionFiltro(null, null, null, null, null)).stream()
                 .map(recepcionDtoMapper::toResponse)
                 .toList());
     }

@@ -83,7 +83,7 @@ class CoreCompraRecepcionFeignClientAdapterTest {
 
     @Test
     void pendientesMapea() {
-        when(client.pendientes(15)).thenReturn(List.of(pendienteResponse()));
+        when(client.pendientesPorEjercicio(15)).thenReturn(List.of(pendienteResponse()));
 
         var pendientes = adapter.pendientes(15);
 
@@ -95,7 +95,7 @@ class CoreCompraRecepcionFeignClientAdapterTest {
 
     @Test
     void pendientesSinDetalleDevuelveListasVacias() {
-        when(client.pendientes(15)).thenReturn(List.of(new CoreCompraRecepcionPendienteResponse(50L, "OC-1", null,
+        when(client.pendientesPorEjercicio(15)).thenReturn(List.of(new CoreCompraRecepcionPendienteResponse(50L, "OC-1", null,
                 15, 7, null, null, null, null, null, null)));
 
         var pendiente = adapter.pendientes(15).get(0);
@@ -106,7 +106,7 @@ class CoreCompraRecepcionFeignClientAdapterTest {
 
     @Test
     void pendientesCaidaSeTraduce() {
-        when(client.pendientes(15)).thenThrow(down());
+        when(client.pendientesPorEjercicio(15)).thenThrow(down());
 
         assertThatThrownBy(() -> adapter.pendientes(15)).isInstanceOf(PedidoCompraSourceUnavailableException.class);
     }

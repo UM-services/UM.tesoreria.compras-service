@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,9 +17,9 @@ public interface CoreCotizacionTramoFeignClient {
     @GetMapping("/api/tesoreria/core/compraCotizacionTramo")
     List<CoreCotizacionTramoResponse> findAll();
 
-    @GetMapping("/api/tesoreria/core/compraCotizacionTramo/minimo")
-    CoreCotizacionMinimoResponse minimo(@RequestParam("ejercicioId") Integer ejercicioId,
-                                        @RequestParam("monto") BigDecimal monto);
+    @GetMapping("/api/tesoreria/core/compraCotizacionTramo/minimo/{ejercicioId}/{monto}")
+    CoreCotizacionMinimoResponse minimo(@PathVariable("ejercicioId") Integer ejercicioId,
+                                        @PathVariable("monto") BigDecimal monto);
 
     @PostMapping("/api/tesoreria/core/compraCotizacionTramo")
     CoreCotizacionTramoResponse create(@RequestBody CoreCotizacionTramoRequest request);
