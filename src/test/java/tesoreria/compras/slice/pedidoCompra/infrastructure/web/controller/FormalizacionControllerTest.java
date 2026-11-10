@@ -58,7 +58,7 @@ class FormalizacionControllerTest {
     @Test
     void listarDevuelveLaLista() {
         when(service.listar(any())).thenReturn(List.of(oc()));
-        assertThat(controller.listar(15, null).getBody()).hasSize(1);
+        assertThat(controller.listar().getBody()).hasSize(1);
     }
 
     @Test

@@ -52,7 +52,7 @@ class PedidoCompraControllerTest {
 
     @Test
     void crearSinEnviar() {
-        when(pedidoCompraService.crear(eq(10L), any(), eq(false))).thenReturn(PedidoCompraFixture.pedido());
+        when(pedidoCompraService.crear(eq(10L), any(), eq(false))).thenReturn(PedidoCompraFixture.resumen());
 
         var response = controller.crear(10L, request(false));
 
@@ -61,7 +61,7 @@ class PedidoCompraControllerTest {
 
     @Test
     void crearConEnviar() {
-        when(pedidoCompraService.crear(eq(10L), any(), eq(true))).thenReturn(PedidoCompraFixture.pedido());
+        when(pedidoCompraService.crear(eq(10L), any(), eq(true))).thenReturn(PedidoCompraFixture.resumen());
 
         var response = controller.crear(10L, request(true));
 
@@ -71,7 +71,7 @@ class PedidoCompraControllerTest {
     @Test
     void actualizarDelega() {
         when(pedidoCompraService.actualizar(eq(10L), eq(1), any(), eq(false)))
-                .thenReturn(PedidoCompraFixture.pedido());
+                .thenReturn(PedidoCompraFixture.resumen());
 
         var response = controller.actualizar(10L, 1, request(false));
 
@@ -81,14 +81,14 @@ class PedidoCompraControllerTest {
 
     @Test
     void enviarDelega() {
-        when(pedidoCompraService.enviar(10L, 1)).thenReturn(PedidoCompraFixture.pedido());
+        when(pedidoCompraService.enviar(10L, 1)).thenReturn(PedidoCompraFixture.resumen());
 
         assertThat(controller.enviar(10L, 1).getBody().numero()).isEqualTo("PC-2026-000001");
     }
 
     @Test
     void descartarDelega() {
-        when(pedidoCompraService.descartar(10L, 1, "No hace falta")).thenReturn(PedidoCompraFixture.pedido());
+        when(pedidoCompraService.descartar(10L, 1, "No hace falta")).thenReturn(PedidoCompraFixture.resumen());
 
         controller.descartar(10L, 1, new DescartarPedidoRequest("No hace falta"));
 
@@ -97,7 +97,7 @@ class PedidoCompraControllerTest {
 
     @Test
     void aprobarDelega() {
-        when(pedidoCompraService.aprobar(10L, 1)).thenReturn(PedidoCompraFixture.pedido());
+        when(pedidoCompraService.aprobar(10L, 1)).thenReturn(PedidoCompraFixture.resumen());
 
         assertThat(controller.aprobar(10L, 1).getStatusCode().value()).isEqualTo(200);
     }
@@ -105,7 +105,7 @@ class PedidoCompraControllerTest {
     @Test
     void rechazarDelega() {
         when(pedidoCompraService.rechazar(10L, 1, "Falta cotización"))
-                .thenReturn(PedidoCompraFixture.pedidoRechazado());
+                .thenReturn(PedidoCompraFixture.resumen(PedidoCompraFixture.pedidoRechazado()));
 
         controller.rechazar(10L, 1, new RechazarPedidoRequest("Falta cotización"));
 
@@ -147,7 +147,7 @@ class PedidoCompraControllerTest {
 
     @Test
     void findByIdDelega() {
-        when(pedidoCompraService.getById(10L, 1)).thenReturn(PedidoCompraFixture.pedido());
+        when(pedidoCompraService.getById(10L, 1)).thenReturn(PedidoCompraFixture.resumen());
 
         assertThat(controller.findById(10L, 1).getBody().items()).hasSize(1);
     }
@@ -199,7 +199,7 @@ class PedidoCompraControllerTest {
     @Test
     void estimarDelega() {
         when(pedidoCompraService.estimar(10L, 1, new BigDecimal("4500000.00"), "fuente"))
-                .thenReturn(PedidoCompraFixture.pedido());
+                .thenReturn(PedidoCompraFixture.resumen());
 
         var response = controller.estimar(10L, 1, new EstimarPedidoRequest(new BigDecimal("4500000.00"), "fuente"));
 
@@ -210,7 +210,7 @@ class PedidoCompraControllerTest {
     @Test
     void autorizarPresupuestoDelega() {
         when(pedidoCompraService.autorizarPresupuesto(10L, 1))
-                .thenReturn(PedidoCompraFixture.pedidoPendientePresupuesto());
+                .thenReturn(PedidoCompraFixture.resumen(PedidoCompraFixture.pedidoPendientePresupuesto()));
 
         assertThat(controller.autorizarPresupuesto(10L, 1).getStatusCode().value()).isEqualTo(200);
     }
@@ -218,7 +218,7 @@ class PedidoCompraControllerTest {
     @Test
     void rechazarPresupuestoDelega() {
         when(pedidoCompraService.rechazarPresupuesto(10L, 1, "fuera de política"))
-                .thenReturn(PedidoCompraFixture.pedidoRechazado());
+                .thenReturn(PedidoCompraFixture.resumen(PedidoCompraFixture.pedidoRechazado()));
 
         controller.rechazarPresupuesto(10L, 1, new RechazarPedidoRequest("fuera de política"));
 

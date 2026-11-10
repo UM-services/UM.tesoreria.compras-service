@@ -75,41 +75,41 @@ public class PedidoCompraService {
         return getContextoInicioPedidoUseCase.getContexto(userId);
     }
 
-    public PedidoCompra crear(Long userId, PedidoCompra pedido, boolean enviar) {
+    public PedidoCompraResumen crear(Long userId, PedidoCompra pedido, boolean enviar) {
         verificarPermiso(userId, PERMISO_INICIAR_PEDIDO);
         PedidoCompra creado = crearPedidoCompraUseCase.crear(userId, pedido);
-        return enviar ? enviarPedidoCompraUseCase.enviar(userId, creado.compraPedidoId()) : creado;
+        return enriquecer(enviar ? enviarPedidoCompraUseCase.enviar(userId, creado.compraPedidoId()) : creado);
     }
 
-    public PedidoCompra actualizar(Long userId, Integer compraPedidoId, PedidoCompra pedido, boolean enviar) {
+    public PedidoCompraResumen actualizar(Long userId, Integer compraPedidoId, PedidoCompra pedido, boolean enviar) {
         verificarPermiso(userId, PERMISO_INICIAR_PEDIDO);
         verificarSolicitante(userId, compraPedidoId);
         PedidoCompra actualizado = actualizarPedidoCompraUseCase.actualizar(compraPedidoId, pedido);
-        return enviar ? enviarPedidoCompraUseCase.enviar(userId, compraPedidoId) : actualizado;
+        return enriquecer(enviar ? enviarPedidoCompraUseCase.enviar(userId, compraPedidoId) : actualizado);
     }
 
-    public PedidoCompra enviar(Long userId, Integer compraPedidoId) {
+    public PedidoCompraResumen enviar(Long userId, Integer compraPedidoId) {
         verificarPermiso(userId, PERMISO_INICIAR_PEDIDO);
         verificarSolicitante(userId, compraPedidoId);
-        return enviarPedidoCompraUseCase.enviar(userId, compraPedidoId);
+        return enriquecer(enviarPedidoCompraUseCase.enviar(userId, compraPedidoId));
     }
 
-    public PedidoCompra descartar(Long userId, Integer compraPedidoId, String motivo) {
+    public PedidoCompraResumen descartar(Long userId, Integer compraPedidoId, String motivo) {
         verificarPermiso(userId, PERMISO_INICIAR_PEDIDO);
         verificarSolicitante(userId, compraPedidoId);
-        return descartarPedidoCompraUseCase.descartar(compraPedidoId, userId, motivo);
+        return enriquecer(descartarPedidoCompraUseCase.descartar(compraPedidoId, userId, motivo));
     }
 
-    public PedidoCompra aprobar(Long userId, Integer compraPedidoId) {
+    public PedidoCompraResumen aprobar(Long userId, Integer compraPedidoId) {
         verificarPermiso(userId, PERMISO_ENVIAR_PEDIDO);
         verificarDependenciaAutorizada(userId, compraPedidoId);
-        return aprobarPedidoCompraUseCase.aprobar(compraPedidoId, userId);
+        return enriquecer(aprobarPedidoCompraUseCase.aprobar(compraPedidoId, userId));
     }
 
-    public PedidoCompra rechazar(Long userId, Integer compraPedidoId, String motivo) {
+    public PedidoCompraResumen rechazar(Long userId, Integer compraPedidoId, String motivo) {
         verificarPermiso(userId, PERMISO_ENVIAR_PEDIDO);
         verificarDependenciaAutorizada(userId, compraPedidoId);
-        return rechazarPedidoCompraUseCase.rechazar(compraPedidoId, userId, motivo);
+        return enriquecer(rechazarPedidoCompraUseCase.rechazar(compraPedidoId, userId, motivo));
     }
 
     // ---- Etapa de presupuesto: revisión de compras + autoridad por monto ----
@@ -149,9 +149,9 @@ public class PedidoCompraService {
         return autoridadGateway.getLimite(userId, ejercicioId);
     }
 
-    public PedidoCompra estimar(Long userId, Integer compraPedidoId, BigDecimal monto, String fuente) {
+    public PedidoCompraResumen estimar(Long userId, Integer compraPedidoId, BigDecimal monto, String fuente) {
         verificarPermiso(userId, PERMISO_ESTIMAR);
-        return estimarPedidoCompraUseCase.estimar(compraPedidoId, userId, monto, fuente);
+        return enriquecer(estimarPedidoCompraUseCase.estimar(compraPedidoId, userId, monto, fuente));
     }
 
     /**
@@ -176,7 +176,7 @@ public class PedidoCompraService {
      * pedido esté pendiente de autorización y que el monto no supere el límite del usuario
      * ({@code multiplico × referencia}, o ilimitado).
      */
-    public PedidoCompra autorizarPresupuesto(Long userId, Integer compraPedidoId) {
+    public PedidoCompraResumen autorizarPresupuesto(Long userId, Integer compraPedidoId) {
         verificarPermiso(userId, PERMISO_PRESUPUESTO_AUTORIZAR);
         PedidoCompra pedido = getPedidoCompraUseCase.getById(compraPedidoId);
         if (!ESTADO_PENDIENTE_AUTORIZACION_PRESUPUESTO.equals(pedido.estado())) {
@@ -189,12 +189,12 @@ public class PedidoCompraService {
         if (excede) {
             throw new LimiteAutorizacionExcedidoException(compraPedidoId, pedido.montoEstimado(), limite.limite());
         }
-        return autorizarPresupuestoPedidoCompraUseCase.autorizar(compraPedidoId, userId);
+        return enriquecer(autorizarPresupuestoPedidoCompraUseCase.autorizar(compraPedidoId, userId));
     }
 
-    public PedidoCompra rechazarPresupuesto(Long userId, Integer compraPedidoId, String motivo) {
+    public PedidoCompraResumen rechazarPresupuesto(Long userId, Integer compraPedidoId, String motivo) {
         verificarPermiso(userId, PERMISO_PRESUPUESTO_AUTORIZAR);
-        return rechazarPresupuestoPedidoCompraUseCase.rechazar(compraPedidoId, userId, motivo);
+        return enriquecer(rechazarPresupuestoPedidoCompraUseCase.rechazar(compraPedidoId, userId, motivo));
     }
 
     /**
@@ -213,10 +213,10 @@ public class PedidoCompraService {
         return enriquecerPedidosUseCase.enriquecer(listConsultaPedidosUseCase.listar(filtro));
     }
 
-    public PedidoCompra getById(Long userId, Integer compraPedidoId) {
+    public PedidoCompraResumen getById(Long userId, Integer compraPedidoId) {
         PedidoCompra pedido = getPedidoCompraUseCase.getById(compraPedidoId);
         verificarLectura(userId, pedido);
-        return pedido;
+        return enriquecer(pedido);
     }
 
     public List<PedidoCompraHistorial> historial(Long userId, Integer compraPedidoId) {
@@ -228,6 +228,13 @@ public class PedidoCompraService {
     public List<PedidoCompra> listar(Long userId) {
         verificarPermiso(userId, PERMISO_INICIAR_PEDIDO);
         return listPedidosCompraUseCase.listar(userId);
+    }
+
+    private PedidoCompraResumen enriquecer(PedidoCompra pedido) {
+        if (pedido == null) {
+            return null;
+        }
+        return enriquecerPedidosUseCase.enriquecer(pedido);
     }
 
     private void verificarLectura(Long userId, PedidoCompra pedido) {

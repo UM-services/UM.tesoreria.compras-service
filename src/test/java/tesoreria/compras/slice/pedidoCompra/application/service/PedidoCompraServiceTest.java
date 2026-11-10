@@ -1,5 +1,6 @@
 package tesoreria.compras.slice.pedidoCompra.application.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,6 +18,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.exception.PermisoDenegadoExce
 import tesoreria.compras.slice.pedidoCompra.domain.model.BandejaEnvio;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
+import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraResumen;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.in.*;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutoridadGateway;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutorizanteGateway;
@@ -59,6 +61,13 @@ class PedidoCompraServiceTest {
     @InjectMocks
     private PedidoCompraService service;
 
+    @BeforeEach
+    void setUp() {
+        lenient().when(enriquecerPedidosUseCase.enriquecer(any(PedidoCompra.class)))
+                .thenAnswer(invocation -> new PedidoCompraResumen(invocation.getArgument(0),
+                        "Dirección General de Administración", "Usuario Demo", "udemo"));
+    }
+
     private void conPermisos(String... claves) {
         when(permisoGateway.getPermisosEfectivos(10L)).thenReturn(List.of(claves));
     }
@@ -97,9 +106,9 @@ class PedidoCompraServiceTest {
         when(crearPedidoCompraUseCase.crear(10L, PedidoCompraFixture.pedidoSinIdentidad()))
                 .thenReturn(PedidoCompraFixture.pedido());
 
-        PedidoCompra creado = service.crear(10L, PedidoCompraFixture.pedidoSinIdentidad(), false);
+        PedidoCompraResumen creado = service.crear(10L, PedidoCompraFixture.pedidoSinIdentidad(), false);
 
-        assertThat(creado.compraPedidoId()).isEqualTo(1);
+        assertThat(creado.pedido().compraPedidoId()).isEqualTo(1);
         verify(enviarPedidoCompraUseCase, never()).enviar(anyLong(), anyInt());
     }
 
@@ -143,7 +152,7 @@ class PedidoCompraServiceTest {
         when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedido());
         when(enviarPedidoCompraUseCase.enviar(10L, 1)).thenReturn(PedidoCompraFixture.pedido());
 
-        assertThat(service.enviar(10L, 1).numero()).isEqualTo("PC-2026-000001");
+        assertThat(service.enviar(10L, 1).pedido().numero()).isEqualTo("PC-2026-000001");
     }
 
     @Test
@@ -213,7 +222,7 @@ class PedidoCompraServiceTest {
         when(listBandejaEnvioUseCase.listar(10L, "PENDIENTE_ENVIO"))
                 .thenReturn(new BandejaEnvio(List.of(20),
                         List.of(PedidoCompraFixture.pedidoPendienteEnvio())));
-        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of(PedidoCompraFixture.resumen()));
+        when(enriquecerPedidosUseCase.enriquecer(anyList())).thenReturn(List.of(PedidoCompraFixture.resumen()));
 
         var bandeja = service.bandeja(10L, "PENDIENTE_ENVIO");
 
@@ -225,7 +234,7 @@ class PedidoCompraServiceTest {
     void bandejaSinDependenciasLoInformaSinPedidos() {
         conPermisos(PedidoCompraService.PERMISO_ENVIAR_PEDIDO);
         when(listBandejaEnvioUseCase.listar(10L, null)).thenReturn(new BandejaEnvio(List.of(), List.of()));
-        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of());
+        when(enriquecerPedidosUseCase.enriquecer(anyList())).thenReturn(List.of());
 
         var bandeja = service.bandeja(10L, null);
 
@@ -238,7 +247,7 @@ class PedidoCompraServiceTest {
         conPermisos(PedidoCompraService.PERMISO_CONSULTAR_PEDIDOS);
         PedidoCompraFiltro filtro = new PedidoCompraFiltro("ENVIADO", null, null, null, null, null);
         when(listConsultaPedidosUseCase.listar(filtro)).thenReturn(List.of(PedidoCompraFixture.pedido()));
-        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of(PedidoCompraFixture.resumen()));
+        when(enriquecerPedidosUseCase.enriquecer(anyList())).thenReturn(List.of(PedidoCompraFixture.resumen()));
 
         assertThat(service.consulta(10L, filtro)).hasSize(1);
     }
@@ -248,7 +257,7 @@ class PedidoCompraServiceTest {
         conPermisos(PedidoCompraService.PERMISO_CONSULTAR_PEDIDOS);
         when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedido());
 
-        assertThat(service.getById(10L, 1).compraPedidoId()).isEqualTo(1);
+        assertThat(service.getById(10L, 1).pedido().compraPedidoId()).isEqualTo(1);
     }
 
     @Test
@@ -265,7 +274,7 @@ class PedidoCompraServiceTest {
         when(getPedidoCompraUseCase.getById(1)).thenReturn(PedidoCompraFixture.pedidoPendienteEnvio());
         when(autorizanteGateway.getDependenciasAutorizadas(10L)).thenReturn(List.of(20));
 
-        assertThat(service.getById(10L, 1).compraPedidoId()).isEqualTo(1);
+        assertThat(service.getById(10L, 1).pedido().compraPedidoId()).isEqualTo(1);
     }
 
     @Test
@@ -302,7 +311,7 @@ class PedidoCompraServiceTest {
     void revisionConPermisoDelegaYEnriqueceConEstadoPorDefecto() {
         conPermisos(PedidoCompraService.PERMISO_ESTIMAR);
         when(listConsultaPedidosUseCase.listar(any())).thenReturn(List.of(PedidoCompraFixture.pedido()));
-        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of(PedidoCompraFixture.resumen()));
+        when(enriquecerPedidosUseCase.enriquecer(anyList())).thenReturn(List.of(PedidoCompraFixture.resumen()));
 
         assertThat(service.revision(10L, null)).hasSize(1);
 
@@ -315,7 +324,7 @@ class PedidoCompraServiceTest {
     void presupuestoBandejaListaLosPendientesDeAutorizar() {
         conPermisos(PedidoCompraService.PERMISO_PRESUPUESTO_AUTORIZAR);
         when(listConsultaPedidosUseCase.listar(any())).thenReturn(List.of(PedidoCompraFixture.pedidoPendientePresupuesto()));
-        when(enriquecerPedidosUseCase.enriquecer(any())).thenReturn(List.of(PedidoCompraFixture.resumen()));
+        when(enriquecerPedidosUseCase.enriquecer(anyList())).thenReturn(List.of(PedidoCompraFixture.resumen()));
 
         assertThat(service.presupuestoBandeja(10L)).hasSize(1);
 

@@ -8,6 +8,7 @@ import tesoreria.compras.slice.pedidoCompra.application.service.CotizacionProces
 import tesoreria.compras.slice.pedidoCompra.domain.model.CotizacionProcesoFiltro;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionPendienteResponse;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoCriteriaRequest;
+import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoPendientesRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoProveedorPendienteResponse;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoProveedorResponse;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoRequest;
@@ -31,19 +32,25 @@ public class CotizacionProcesoController {
     private final CotizacionProcesoService cotizacionProcesoService;
     private final CotizacionProcesoDtoMapper cotizacionProcesoDtoMapper;
 
-    @GetMapping("/pendientes")
+    @PostMapping("/pendientes")
     public ResponseEntity<List<CotizacionPendienteResponse>> pendientes(
-            @RequestParam(required = false) Integer ejercicioId,
-            @RequestParam(required = false) List<Integer> dependenciaIds) {
-        return ResponseEntity.ok(cotizacionProcesoService.pendientes(ejercicioId, dependenciaIds).stream()
+            @RequestBody CotizacionProcesoPendientesRequest request) {
+        return ResponseEntity.ok(cotizacionProcesoService
+                .pendientes(request.ejercicioId(), request.dependenciaIds()).stream()
                 .map(cotizacionProcesoDtoMapper::toResponse)
                 .toList());
     }
 
     /** Bandeja transversal "Cotizaciones pedidas": documentos de proveedor en ENVIADA. */
     @GetMapping("/proveedores-pendientes")
+    public ResponseEntity<List<CotizacionProcesoProveedorPendienteResponse>> proveedoresPendientes() {
+        return proveedoresPendientes(null);
+    }
+
+    /** Bandeja transversal "Cotizaciones pedidas" para un ejercicio. */
+    @GetMapping("/proveedores-pendientes/{ejercicioId}")
     public ResponseEntity<List<CotizacionProcesoProveedorPendienteResponse>> proveedoresPendientes(
-            @RequestParam(required = false) Integer ejercicioId) {
+            @PathVariable Integer ejercicioId) {
         return ResponseEntity.ok(cotizacionProcesoService.respuestasPendientes(ejercicioId).stream()
                 .map(cotizacionProcesoDtoMapper::toResponse)
                 .toList());

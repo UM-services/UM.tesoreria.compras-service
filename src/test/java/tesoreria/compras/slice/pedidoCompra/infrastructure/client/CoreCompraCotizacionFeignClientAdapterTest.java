@@ -76,7 +76,7 @@ class CoreCompraCotizacionFeignClientAdapterTest {
 
     @Test
     void pendientesMapea() {
-        when(client.pendientes(eq(15), any())).thenReturn(List.of(
+        when(client.pendientes(any())).thenReturn(List.of(
                 new CoreCompraCotizacionPendienteResponse(100, 2, "PC-1", 14, 1, new BigDecimal("3.00"),
                         "Unidad", "Notebook", null, null)));
 
@@ -86,7 +86,7 @@ class CoreCompraCotizacionFeignClientAdapterTest {
 
     @Test
     void pendientesUnavailable() {
-        when(client.pendientes(eq(15), any())).thenThrow(down());
+        when(client.pendientes(any())).thenThrow(down());
 
         assertThatThrownBy(() -> adapter.pendientes(15, List.of(14)))
                 .isInstanceOf(PedidoCompraSourceUnavailableException.class);
@@ -94,7 +94,7 @@ class CoreCompraCotizacionFeignClientAdapterTest {
 
     @Test
     void respuestasPendientesMapea() {
-        when(client.proveedoresPendientes(15)).thenReturn(List.of(
+        when(client.proveedoresPendientesPorEjercicio(15)).thenReturn(List.of(
                 new CoreCompraCotizacionProveedorPendienteResponse(1L, "SC-1", 15, null,
                         new CoreCompraCotizacionProveedorResponse(5L, 7, "p@x.com", "ENVIADA", null, null,
                                 null, null, null, null, null, null, null, List.of()),
@@ -106,7 +106,7 @@ class CoreCompraCotizacionFeignClientAdapterTest {
 
     @Test
     void respuestasPendientesUnavailable() {
-        when(client.proveedoresPendientes(15)).thenThrow(down());
+        when(client.proveedoresPendientesPorEjercicio(15)).thenThrow(down());
 
         assertThatThrownBy(() -> adapter.respuestasPendientes(15))
                 .isInstanceOf(PedidoCompraSourceUnavailableException.class);

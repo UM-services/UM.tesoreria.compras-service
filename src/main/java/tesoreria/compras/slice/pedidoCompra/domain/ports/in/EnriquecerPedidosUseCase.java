@@ -8,4 +8,6 @@ import java.util.List;
 public interface EnriquecerPedidosUseCase {
 
     List<PedidoCompraResumen> enriquecer(List<PedidoCompra> pedidos);
+
+    PedidoCompraResumen enriquecer(PedidoCompra pedido);
 }

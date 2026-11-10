@@ -9,6 +9,47 @@ La versión vive únicamente en el `<version>` del `pom.xml`.
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-11-09
+
+### Cambiado
+
+- refactor(api): la fachada de compras resuelve las dependencias habilitadas del autorizante contra el
+  nuevo contexto independiente de core `compras/autorizanteEnvio`
+  (`GET /api/tesoreria/core/compras/autorizanteEnvio/usuario/{usuarioId}`). Se reemplazan
+  `CoreCompraPedidoAutorizanteFeignClient`/`...Response` por
+  `CoreAutorizanteEnvioFeignClient`/`CoreAutorizanteEnvioResponse`. El puerto
+  `AutorizanteGateway`, la bandeja y las reglas de acceso no cambian.
+- **Orden de despliegue**: aplicar `V422__compras_autorizante_envio.sql` en core y desplegar
+  core-service antes de esta versión. El path anterior de core queda como alias deprecado durante
+  una release.
+- La definición OpenAPI publica la versión del servicio (`0.12.1`).
+
+## [0.12.0] - 2026-11-09
+
+### Agregado
+
+- feat(pedidoCompra): los listados (bandeja de envío, revisión, autorización de presupuesto y
+  consulta) y el detalle exponen `solicitanteLogin` junto con `solicitanteNombre` y
+  `dependenciaNombre`. `GET /pedido/{id}` y las respuestas de las acciones (`crear`,
+  `actualizar`, `enviar`, `descartar`, `aprobar`, `rechazar`, `estimar` y las de presupuesto)
+  devuelven el pedido enriquecido, de modo que la presentación muestra la dependencia y el
+  usuario que inició el pedido sin consultas adicionales.
+
+### Cambiado
+
+- refactor(api): los endpoints de la fachada de compras dejan de recibir query params.
+  `cotizacion/pendientes` pasa a `POST` con body (`CotizacionProcesoPendientesRequest`);
+  `cotizacion/proveedores-pendientes/{ejercicioId}`, `formalizacion/pendientes/{ejercicioId}`,
+  `formalizacion` sin filtros + `POST /search`, `recepcion/pendientes/{ejercicioId}` y
+  `recepcion` sin filtros + `POST /search`. Los clientes Feign de core se actualizaron a
+  path/body. **Cambio de contrato**: requiere desplegar en conjunto con el frontend de
+  compras; `GET /cotizacion/pendientes` deja de existir y las listas sin filtros devuelven
+  el ejercicio en curso o el universo completo según el endpoint.
+- docs/copy: los mensajes de error y las observaciones de historial del circuito de compras
+  usan «presupuesto» en lugar de «cotización». Los códigos (`COTIZACIONES_NO_CONFIGURADAS`)
+  y las rutas no cambian.
+- La definición OpenAPI publica la versión del servicio (`0.12.0`).
+
 ## [0.11.2] - 2026-10-23
 
 ### Cambiado
