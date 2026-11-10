@@ -9,6 +9,21 @@ La versión vive únicamente en el `<version>` del `pom.xml`.
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-11-09
+
+### Cambiado
+
+- refactor(api): la fachada de compras resuelve las dependencias habilitadas del autorizante contra el
+  nuevo contexto independiente de core `compras/autorizanteEnvio`
+  (`GET /api/tesoreria/core/compras/autorizanteEnvio/usuario/{usuarioId}`). Se reemplazan
+  `CoreCompraPedidoAutorizanteFeignClient`/`...Response` por
+  `CoreAutorizanteEnvioFeignClient`/`CoreAutorizanteEnvioResponse`. El puerto
+  `AutorizanteGateway`, la bandeja y las reglas de acceso no cambian.
+- **Orden de despliegue**: aplicar `V422__compras_autorizante_envio.sql` en core y desplegar
+  core-service antes de esta versión. El path anterior de core queda como alias deprecado durante
+  una release.
+- La definición OpenAPI publica la versión del servicio (`0.12.1`).
+
 ## [0.12.0] - 2026-11-09
 
 ### Agregado
