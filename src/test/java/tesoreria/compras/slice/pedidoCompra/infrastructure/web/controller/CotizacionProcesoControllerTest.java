@@ -12,6 +12,7 @@ import tesoreria.compras.slice.pedidoCompra.domain.model.CotizacionProcesoItem;
 import tesoreria.compras.slice.pedidoCompra.domain.model.CotizacionProcesoProveedor;
 import tesoreria.compras.slice.pedidoCompra.domain.model.CotizacionProcesoProveedorPendiente;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoCriteriaRequest;
+import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoPendientesRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoItemRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoProveedorRequest;
 import tesoreria.compras.slice.pedidoCompra.infrastructure.web.dto.CotizacionProcesoRequest;
@@ -57,7 +58,7 @@ class CotizacionProcesoControllerTest {
         when(service.pendientes(eq(15), any())).thenReturn(List.of(
                 new CotizacionPendiente(100, 2, "PC-1", 14, 1, null, "Unidad", "Notebook", null, null)));
 
-        var response = controller.pendientes(15, List.of(14));
+        var response = controller.pendientes(new CotizacionProcesoPendientesRequest(15, List.of(14)));
 
         assertThat(response.getBody()).hasSize(1);
         assertThat(response.getBody().get(0).compraPedidoItemId()).isEqualTo(100);

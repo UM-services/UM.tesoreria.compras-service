@@ -167,7 +167,7 @@ public class CotizacionProcesoService {
             boolean excede = !limite.tieneAutoridad() || (!limite.ilimitado()
                     && (limite.limite() == null || monto == null || monto.compareTo(limite.limite()) > 0));
             if (excede) {
-                throw new LimiteAutorizacionExcedidoException("el proceso de cotización " + compraCotizacionId,
+                throw new LimiteAutorizacionExcedidoException("el proceso de presupuesto " + compraCotizacionId,
                         monto, limite.limite());
             }
             limiteAplicado = limite.limite();

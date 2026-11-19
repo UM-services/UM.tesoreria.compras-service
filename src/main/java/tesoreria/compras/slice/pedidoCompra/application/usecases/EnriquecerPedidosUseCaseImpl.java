@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Resuelve los nombres de dependencia y solicitante de un listado, cacheando por request
- * para no repetir consultas cuando varios pedidos comparten el mismo id. Si la resolución
- * de un nombre falla, degrada a {@code null} sin romper el listado.
+ * Resuelve los nombres de dependencia y los datos del solicitante de un listado, cacheando
+ * por request para no repetir consultas cuando varios pedidos comparten el mismo id. Si la
+ * resolución de un dato falla, degrada a {@code null} sin romper el listado.
  */
 @Component
 @RequiredArgsConstructor
@@ -30,13 +30,25 @@ public class EnriquecerPedidosUseCaseImpl implements EnriquecerPedidosUseCase {
             return List.of();
         }
         Map<Integer, String> dependencias = new HashMap<>();
-        Map<Long, String> solicitantes = new HashMap<>();
+        Map<Long, Solicitante> solicitantes = new HashMap<>();
         return pedidos.stream()
-                .map(pedido -> new PedidoCompraResumen(
-                        pedido,
-                        dependenciaNombre(pedido, dependencias),
-                        solicitanteNombre(pedido, solicitantes)))
+                .map(pedido -> {
+                    Solicitante solicitante = solicitante(pedido, solicitantes);
+                    return new PedidoCompraResumen(
+                            pedido,
+                            dependenciaNombre(pedido, dependencias),
+                            solicitante == null ? null : solicitante.nombre(),
+                            solicitante == null ? null : solicitante.login());
+                })
                 .toList();
+    }
+
+    @Override
+    public PedidoCompraResumen enriquecer(PedidoCompra pedido) {
+        if (pedido == null) {
+            return null;
+        }
+        return enriquecer(List.of(pedido)).getFirst();
     }
 
     private String dependenciaNombre(PedidoCompra pedido, Map<Integer, String> cache) {
@@ -58,7 +70,7 @@ public class EnriquecerPedidosUseCaseImpl implements EnriquecerPedidosUseCase {
         return nombre;
     }
 
-    private String solicitanteNombre(PedidoCompra pedido, Map<Long, String> cache) {
+    private Solicitante solicitante(PedidoCompra pedido, Map<Long, Solicitante> cache) {
         Integer id = pedido.solicitanteId();
         if (id == null) {
             return null;
@@ -67,14 +79,13 @@ public class EnriquecerPedidosUseCaseImpl implements EnriquecerPedidosUseCase {
         if (cache.containsKey(key)) {
             return cache.get(key);
         }
-        String nombre = null;
+        Solicitante solicitante = null;
         try {
-            Solicitante solicitante = contextoGateway.getSolicitante(key);
-            nombre = solicitante == null ? null : solicitante.nombre();
+            solicitante = contextoGateway.getSolicitante(key);
         } catch (RuntimeException exception) {
-            nombre = null;
+            solicitante = null;
         }
-        cache.put(key, nombre);
-        return nombre;
+        cache.put(key, solicitante);
+        return solicitante;
     }
 }

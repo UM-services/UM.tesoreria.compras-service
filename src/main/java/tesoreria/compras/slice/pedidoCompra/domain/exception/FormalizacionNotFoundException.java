@@ -7,7 +7,7 @@ public class FormalizacionNotFoundException extends RuntimeException {
     }
 
     public FormalizacionNotFoundException(Long compraCotizacionId, boolean porCotizacion) {
-        super("El proceso de cotización " + compraCotizacionId + " no tiene Orden de Compra");
+        super("El proceso de presupuesto " + compraCotizacionId + " no tiene Orden de Compra");
     }
 
     public FormalizacionNotFoundException(String message) {

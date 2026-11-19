@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tesoreria.compras.configuration.security.RequierePermiso;
 import tesoreria.compras.slice.pedidoCompra.application.service.FormalizacionService;
@@ -37,21 +36,25 @@ public class FormalizacionController {
     private final FormalizacionService formalizacionService;
     private final FormalizacionDtoMapper formalizacionDtoMapper;
 
-    /** Adjudicaciones pendientes de emitir la Orden de Compra. */
+    /** Adjudicaciones del ejercicio en curso pendientes de emitir la Orden de Compra. */
     @GetMapping("/pendientes")
+    public ResponseEntity<List<FormalizacionPendienteResponse>> pendientes() {
+        return pendientes(null);
+    }
+
+    /** Adjudicaciones del ejercicio indicado pendientes de emitir la Orden de Compra. */
+    @GetMapping("/pendientes/{ejercicioId}")
     public ResponseEntity<List<FormalizacionPendienteResponse>> pendientes(
-            @RequestParam(required = false) Integer ejercicioId) {
+            @PathVariable Integer ejercicioId) {
         return ResponseEntity.ok(formalizacionService.pendientes(ejercicioId).stream()
                 .map(formalizacionDtoMapper::toResponse)
                 .toList());
     }
 
     @GetMapping
-    public ResponseEntity<List<FormalizacionResponse>> listar(
-            @RequestParam(required = false) Integer ejercicioId,
-            @RequestParam(required = false) Integer proveedorId) {
-        return ResponseEntity.ok(formalizacionService.listar(new FormalizacionFiltro(ejercicioId, proveedorId,
-                        null, null)).stream()
+    public ResponseEntity<List<FormalizacionResponse>> listar() {
+        return ResponseEntity.ok(formalizacionService.listar(
+                        new FormalizacionFiltro(null, null, null, null)).stream()
                 .map(formalizacionDtoMapper::toResponse)
                 .toList());
     }

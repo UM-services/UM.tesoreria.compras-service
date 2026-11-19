@@ -67,7 +67,7 @@ class RecepcionControllerTest {
     void listarDevuelveLaLista() {
         when(service.listar(any())).thenReturn(List.of(recepcion()));
 
-        assertThat(controller.listar(15, 50L, "CONFORME").getBody()).hasSize(1);
+        assertThat(controller.listar().getBody()).hasSize(1);
     }
 
     @Test

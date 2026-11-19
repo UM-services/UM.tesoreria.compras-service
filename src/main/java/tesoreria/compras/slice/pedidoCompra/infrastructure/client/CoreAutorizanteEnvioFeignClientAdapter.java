@@ -10,15 +10,15 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class CoreCompraPedidoAutorizanteFeignClientAdapter implements AutorizanteGateway {
+public class CoreAutorizanteEnvioFeignClientAdapter implements AutorizanteGateway {
 
-    private final CoreCompraPedidoAutorizanteFeignClient coreCompraPedidoAutorizanteFeignClient;
+    private final CoreAutorizanteEnvioFeignClient coreAutorizanteEnvioFeignClient;
 
     @Override
     public List<Integer> getDependenciasAutorizadas(Long userId) {
         try {
-            CoreCompraPedidoAutorizanteResponse response =
-                    coreCompraPedidoAutorizanteFeignClient.getDependencias(userId);
+            CoreAutorizanteEnvioResponse response =
+                    coreAutorizanteEnvioFeignClient.getDependencias(userId);
             return response.dependenciaIds() == null ? List.of() : response.dependenciaIds();
         } catch (FeignException.NotFound exception) {
             // Autorizante sin dependencias configuradas: fail-closed, no un error de infraestructura.

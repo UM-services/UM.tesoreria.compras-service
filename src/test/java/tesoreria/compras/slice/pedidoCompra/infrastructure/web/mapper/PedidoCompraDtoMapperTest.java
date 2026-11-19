@@ -61,6 +61,7 @@ class PedidoCompraDtoMapperTest {
         assertThat(response.rechazoMotivo()).isEqualTo("Falta cotización");
         assertThat(response.dependenciaNombre()).isNull();
         assertThat(response.solicitanteNombre()).isNull();
+        assertThat(response.solicitanteLogin()).isNull();
     }
 
     @Test
@@ -70,6 +71,7 @@ class PedidoCompraDtoMapperTest {
         assertThat(response.compraPedidoId()).isEqualTo(1);
         assertThat(response.dependenciaNombre()).isEqualTo("Dirección General de Administración");
         assertThat(response.solicitanteNombre()).isEqualTo("Usuario Demo");
+        assertThat(response.solicitanteLogin()).isEqualTo("udemo");
     }
 
     @Test

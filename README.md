@@ -1,5 +1,16 @@
 # UM Tesoreria Compras Service
 
+![Java](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-6DB33F?logo=springboot&logoColor=white)
+![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-6DB33F?logo=spring&logoColor=white)
+![OpenFeign](https://img.shields.io/badge/OpenFeign--6DB33F)
+![Consul](https://img.shields.io/badge/Consul--F24C53?logo=consul&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus--E6522C?logo=prometheus&logoColor=white)
+![Springdoc OpenAPI](https://img.shields.io/badge/Springdoc%20OpenAPI-3.1.1-85EA2D?logo=swagger&logoColor=black)
+![Maven](https://img.shields.io/badge/Maven--C71A36?logo=apachemaven&logoColor=white)
+![JUnit](https://img.shields.io/badge/JUnit--25A162?logo=junit5&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker--2496ED?logo=docker&logoColor=white)
+
 Servicio responsable del circuito de compras de tesorería. La planificación y las reglas
 del proyecto viven en [`specs/`](specs/).
 

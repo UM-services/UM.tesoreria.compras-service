@@ -66,7 +66,7 @@ class CoreCompraFormalizacionFeignClientAdapterTest {
 
     @Test
     void pendientesMapea() {
-        when(client.pendientes(15)).thenReturn(List.of(new CoreCompraFormalizacionPendienteResponse(1L, "SC-1", 15,
+        when(client.pendientesPorEjercicio(15)).thenReturn(List.of(new CoreCompraFormalizacionPendienteResponse(1L, "SC-1", 15,
                 9L, 5L, 7, new BigDecimal("28000.00"), "ARS", "30 días", "48 horas", "12 meses",
                 List.of(new CoreCompraFormalizacionItemResponse(null, 9L, 100, 1, new BigDecimal("3.00"), null,
                         "Notebook", null, null, null, null)))));
@@ -104,14 +104,14 @@ class CoreCompraFormalizacionFeignClientAdapterTest {
 
     @Test
     void pendientesCaidaSeTraduce() {
-        when(client.pendientes(15)).thenThrow(down());
+        when(client.pendientesPorEjercicio(15)).thenThrow(down());
 
         assertThatThrownBy(() -> adapter.pendientes(15)).isInstanceOf(PedidoCompraSourceUnavailableException.class);
     }
 
     @Test
     void pendientesSinItemsDevuelveListaVacia() {
-        when(client.pendientes(15)).thenReturn(List.of(new CoreCompraFormalizacionPendienteResponse(1L, "SC-1", 15,
+        when(client.pendientesPorEjercicio(15)).thenReturn(List.of(new CoreCompraFormalizacionPendienteResponse(1L, "SC-1", 15,
                 9L, 5L, 7, null, null, null, null, null, null)));
 
         assertThat(adapter.pendientes(15).get(0).items()).isEmpty();

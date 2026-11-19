@@ -28,6 +28,7 @@ public record PedidoCompraResponse(
         String descartadoMotivo,
         String dependenciaNombre,
         String solicitanteNombre,
+        String solicitanteLogin,
         List<PedidoCompraItemResponse> items
 ) {
 }

@@ -54,6 +54,12 @@ y consume un proveedor real de core por Feign. Molde: `umhub-service`.
 Nada de esto bloquea un feature. Se hace cuando haya algo concreto que integrar, y se
 valida en ese momento.
 
+### Autorizantes de envío (contexto independiente)
+
+El vínculo autorizante ↔ dependencias vive en core (`compras/autorizanteEnvio`) y esta fachada
+solo lo consume por Feign. El cambio de cliente y el orden de despliegue están documentados en
+[`specs/2026-11-09-autorizantes-envio/`](2026-11-09-autorizantes-envio/).
+
 ### Estado de core-service
 
 Relevado al construir el esqueleto (feature 1), útil para dimensionar cualquier integración:

@@ -4,6 +4,6 @@ package tesoreria.compras.slice.pedidoCompra.domain.exception;
 public class CotizacionTramoInvalidaException extends RuntimeException {
 
     public CotizacionTramoInvalidaException() {
-        super("La configuración del tramo de cotizaciones es inválida");
+        super("La configuración del tramo de presupuestos es inválida");
     }
 }

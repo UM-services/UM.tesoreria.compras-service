@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tesoreria.compras.slice.pedidoCompra.PedidoCompraFixture;
 import tesoreria.compras.slice.pedidoCompra.domain.exception.DependenciaNoAsignadaException;
+import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompra;
 import tesoreria.compras.slice.pedidoCompra.domain.model.PedidoCompraFiltro;
 import tesoreria.compras.slice.pedidoCompra.domain.model.Solicitante;
 import tesoreria.compras.slice.pedidoCompra.domain.ports.out.AutorizanteGateway;
@@ -217,8 +218,23 @@ class PedidoCompraUseCasesTest {
         assertThat(resumenes).hasSize(2);
         assertThat(resumenes.get(0).dependenciaNombre()).isEqualTo("Dirección General de Administración");
         assertThat(resumenes.get(0).solicitanteNombre()).isEqualTo("Usuario Demo");
+        assertThat(resumenes.get(0).solicitanteLogin()).isEqualTo("udemo");
         verify(contextoGateway, times(1)).getDependencia(20);
         verify(contextoGateway, times(1)).getSolicitante(10L);
+    }
+
+    @Test
+    void enriquecerUnPedidoResuelveNombreYLogin() {
+        when(contextoGateway.getDependencia(20)).thenReturn(PedidoCompraFixture.dependencia());
+        when(contextoGateway.getSolicitante(10L)).thenReturn(PedidoCompraFixture.solicitante());
+        var useCase = new EnriquecerPedidosUseCaseImpl(contextoGateway);
+
+        var resumen = useCase.enriquecer(PedidoCompraFixture.pedido());
+
+        assertThat(resumen.dependenciaNombre()).isEqualTo("Dirección General de Administración");
+        assertThat(resumen.solicitanteNombre()).isEqualTo("Usuario Demo");
+        assertThat(resumen.solicitanteLogin()).isEqualTo("udemo");
+        assertThat(useCase.enriquecer((PedidoCompra) null)).isNull();
     }
 
     @Test
@@ -226,7 +242,7 @@ class PedidoCompraUseCasesTest {
         var useCase = new EnriquecerPedidosUseCaseImpl(contextoGateway);
 
         assertThat(useCase.enriquecer(List.of())).isEmpty();
-        assertThat(useCase.enriquecer(null)).isEmpty();
+        assertThat(useCase.enriquecer((List<PedidoCompra>) null)).isEmpty();
         verifyNoInteractions(contextoGateway);
     }
 
@@ -240,6 +256,7 @@ class PedidoCompraUseCasesTest {
 
         assertThat(resumenes.get(0).dependenciaNombre()).isNull();
         assertThat(resumenes.get(0).solicitanteNombre()).isNull();
+        assertThat(resumenes.get(0).solicitanteLogin()).isNull();
     }
 
     @Test

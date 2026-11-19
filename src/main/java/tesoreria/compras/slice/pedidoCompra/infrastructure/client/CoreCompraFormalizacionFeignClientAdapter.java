@@ -26,7 +26,10 @@ public class CoreCompraFormalizacionFeignClientAdapter implements FormalizacionG
     @Override
     public List<FormalizacionPendiente> pendientes(Integer ejercicioId) {
         try {
-            return client.pendientes(ejercicioId).stream().map(this::toDomain).toList();
+            List<CoreCompraFormalizacionPendienteResponse> responses = ejercicioId == null
+                    ? client.pendientes()
+                    : client.pendientesPorEjercicio(ejercicioId);
+            return responses.stream().map(this::toDomain).toList();
         } catch (FeignException exception) {
             throw new PedidoCompraSourceUnavailableException(exception);
         }
@@ -73,7 +76,7 @@ public class CoreCompraFormalizacionFeignClientAdapter implements FormalizacionG
             return toDomain(client.formalizar(toRequest(solicitud, usuarioId)));
         } catch (FeignException.NotFound exception) {
             throw new FormalizacionNotFoundException(
-                    "El proceso de cotización no tiene una adjudicación válida para formalizar");
+                    "El proceso de presupuesto no tiene una adjudicación válida para formalizar");
         } catch (FeignException.Conflict exception) {
             throw new FormalizacionConflictoException(
                     "La Orden de Compra no puede emitirse en el estado actual del proceso");

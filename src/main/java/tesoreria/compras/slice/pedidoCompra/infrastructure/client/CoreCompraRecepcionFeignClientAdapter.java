@@ -28,7 +28,10 @@ public class CoreCompraRecepcionFeignClientAdapter implements RecepcionGateway {
     @Override
     public List<RecepcionPendiente> pendientes(Integer ejercicioId) {
         try {
-            return client.pendientes(ejercicioId).stream().map(this::toDomain).toList();
+            List<CoreCompraRecepcionPendienteResponse> responses = ejercicioId == null
+                    ? client.pendientes()
+                    : client.pendientesPorEjercicio(ejercicioId);
+            return responses.stream().map(this::toDomain).toList();
         } catch (FeignException exception) {
             throw new PedidoCompraSourceUnavailableException(exception);
         }
